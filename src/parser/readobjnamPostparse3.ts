@@ -1,7 +1,8 @@
 import type { ParseState, ParseStep } from './types';
 import { SOURCE_REFS } from './sourceRefs';
-import { findFuzzy } from './objectLookup';
+import { findFuzzy, byOtyp } from './objectLookup';
 import { ARTIFACTS_BY_NAME } from '../data/artifacts';
+import { JAPANESE_ITEMS } from '../data/japaneseItems';
 import { fuzzyEquals } from './utils';
 import type { Rng } from './rng';
 
@@ -34,6 +35,29 @@ export function readobjnamPostparse3(input: ParseState, rng: Rng): { state: Pars
                 `Resolved to "${result.obj.actualName}" via a rarity-weighted random pick.`,
               ]
             : [`Matched "${candidate}" against "${result.obj.actualName}".`],
+      });
+      return { state: s, steps };
+    }
+  }
+
+  // Japanese item name aliases (Samurai role flavor names).
+  for (const candidate of candidates) {
+    const key = Object.keys(JAPANESE_ITEMS).find((alias) => fuzzyEquals(alias, candidate));
+    if (key) {
+      const otyp = JAPANESE_ITEMS[key];
+      const obj = byOtyp(otyp);
+      s = { ...s, otyp, oclass: obj?.class ?? s.oclass };
+      steps.push({
+        id: 'postparse3:japanese-item',
+        stage: 'postparse3',
+        title: 'Japanese item name alias',
+        matched: true,
+        inputBefore: candidate,
+        inputAfter: obj?.actualName ?? otyp,
+        stateDiff: { otyp, oclass: obj?.class },
+        sourceRef: SOURCE_REFS.japaneseItems,
+        category: 'lookup',
+        notes: [`"${key}" is a Samurai-flavor alias for "${obj?.actualName ?? otyp}".`],
       });
       return { state: s, steps };
     }

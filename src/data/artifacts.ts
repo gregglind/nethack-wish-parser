@@ -1,27 +1,49 @@
 import type { ArtifactDef } from '../parser/types';
 
-/** Curated subset of artilist.h (~46 real artifacts). */
+/**
+ * Full artifact roster extracted from include/artilist.h at the pinned
+ * NetHack 5.0.0 release commit. This build has exactly 33 real artifacts
+ * (20 ordinary + 13 quest artifacts, one per role) -- there is no ~46-entry
+ * list in this source tree, so this replaces the earlier "~20 curated"
+ * placeholder with the complete set rather than a larger curated subset.
+ */
 export const ARTIFACTS: ArtifactDef[] = [
-  { name: 'Eye of the Aethiopica', baseOtyp: 'AMULET_OF_ESP', alignment: 'neutral', isQuestArtifact: true },
-  { name: 'Platinum Yendorian Express Card', baseOtyp: 'CREDIT_CARD', alignment: 'neutral', isQuestArtifact: true },
-  { name: 'Eyes of the Overworld', baseOtyp: 'LENSES', alignment: 'neutral', isQuestArtifact: true },
-  { name: 'Orb of Fate', baseOtyp: 'CRYSTAL_BALL', alignment: 'neutral', isQuestArtifact: true },
-  { name: 'Sceptre of Might', baseOtyp: 'FLAIL', alignment: 'lawful', isQuestArtifact: true },
-  { name: 'Orb of Detection', baseOtyp: 'CRYSTAL_BALL', alignment: 'lawful', isQuestArtifact: true },
-  { name: 'Magic Mirror of Merlin', baseOtyp: 'CRYSTAL_BALL', alignment: 'lawful', isQuestArtifact: true },
-  { name: 'Mitre of Holiness', baseOtyp: 'HELM_OF_BRILLIANCE', alignment: 'lawful', isQuestArtifact: true },
-  { name: 'Master Key of Thievery', baseOtyp: 'SKELETON_KEY', alignment: 'chaotic', isQuestArtifact: true },
-  { name: 'Longbow of Diana', baseOtyp: 'LONG_SWORD', alignment: 'chaotic', isQuestArtifact: true },
+  // ---- Ordinary artifacts (20) ----
   { name: 'Excalibur', baseOtyp: 'LONG_SWORD', alignment: 'lawful', isQuestArtifact: false },
-  { name: 'Stormbringer', baseOtyp: 'BROADSWORD', alignment: 'chaotic', isQuestArtifact: false },
-  { name: 'Mjollnir', baseOtyp: 'FLAIL', alignment: 'neutral', isQuestArtifact: false },
-  { name: 'Sunsword', baseOtyp: 'LONG_SWORD', alignment: 'lawful', isQuestArtifact: false },
+  { name: 'Stormbringer', baseOtyp: 'RUNESWORD', alignment: 'chaotic', isQuestArtifact: false },
+  { name: 'Mjollnir', baseOtyp: 'WAR_HAMMER', alignment: 'neutral', isQuestArtifact: false },
+  { name: 'Cleaver', baseOtyp: 'BATTLE_AXE', alignment: 'neutral', isQuestArtifact: false },
+  { name: 'Grimtooth', baseOtyp: 'ORCISH_DAGGER', alignment: 'chaotic', isQuestArtifact: false },
+  { name: 'Orcrist', baseOtyp: 'ELVEN_BROADSWORD', alignment: 'chaotic', isQuestArtifact: false },
+  { name: 'Sting', baseOtyp: 'ELVEN_DAGGER', alignment: 'chaotic', isQuestArtifact: false },
   { name: 'Magicbane', baseOtyp: 'ATHAME', alignment: 'neutral', isQuestArtifact: false },
-  { name: 'Grimtooth', baseOtyp: 'KNIFE', alignment: 'chaotic', isQuestArtifact: false },
   { name: 'Frost Brand', baseOtyp: 'LONG_SWORD', alignment: 'unaligned', isQuestArtifact: false },
   { name: 'Fire Brand', baseOtyp: 'LONG_SWORD', alignment: 'unaligned', isQuestArtifact: false },
-  { name: 'Vorpal Blade', baseOtyp: 'LONG_SWORD', alignment: 'unaligned', isQuestArtifact: false },
-  { name: 'Snickersnee', baseOtyp: 'SHORT_SWORD', alignment: 'unaligned', isQuestArtifact: false },
+  { name: 'Dragonbane', baseOtyp: 'BROADSWORD', alignment: 'unaligned', isQuestArtifact: false },
+  { name: 'Demonbane', baseOtyp: 'SILVER_MACE', alignment: 'lawful', isQuestArtifact: false },
+  { name: 'Werebane', baseOtyp: 'SILVER_SABER', alignment: 'unaligned', isQuestArtifact: false },
+  { name: 'Grayswandir', baseOtyp: 'SILVER_SABER', alignment: 'lawful', isQuestArtifact: false },
+  { name: 'Giantslayer', baseOtyp: 'LONG_SWORD', alignment: 'neutral', isQuestArtifact: false },
+  { name: 'Ogresmasher', baseOtyp: 'WAR_HAMMER', alignment: 'unaligned', isQuestArtifact: false },
+  { name: 'Trollsbane', baseOtyp: 'MORNING_STAR', alignment: 'unaligned', isQuestArtifact: false },
+  { name: 'Vorpal Blade', baseOtyp: 'LONG_SWORD', alignment: 'neutral', isQuestArtifact: false },
+  { name: 'Snickersnee', baseOtyp: 'KATANA', alignment: 'lawful', isQuestArtifact: false },
+  { name: 'Sunsword', baseOtyp: 'LONG_SWORD', alignment: 'lawful', isQuestArtifact: false },
+
+  // ---- Quest artifacts (13, one per role) ----
+  { name: 'Orb of Detection', baseOtyp: 'CRYSTAL_BALL', alignment: 'lawful', isQuestArtifact: true }, // Archeologist
+  { name: 'Heart of Ahriman', baseOtyp: 'LUCKSTONE', alignment: 'neutral', isQuestArtifact: true }, // Barbarian
+  { name: 'Sceptre of Might', baseOtyp: 'MACE', alignment: 'lawful', isQuestArtifact: true }, // Caveman
+  { name: 'Staff of Aesculapius', baseOtyp: 'QUARTERSTAFF', alignment: 'neutral', isQuestArtifact: true }, // Healer
+  { name: 'Magic Mirror of Merlin', baseOtyp: 'MIRROR', alignment: 'lawful', isQuestArtifact: true }, // Knight
+  { name: 'Eyes of the Overworld', baseOtyp: 'LENSES', alignment: 'neutral', isQuestArtifact: true }, // Monk
+  { name: 'Mitre of Holiness', baseOtyp: 'HELM_OF_BRILLIANCE', alignment: 'lawful', isQuestArtifact: true }, // Priest
+  { name: 'Longbow of Diana', baseOtyp: 'BOW', alignment: 'chaotic', isQuestArtifact: true }, // Ranger
+  { name: 'Master Key of Thievery', baseOtyp: 'SKELETON_KEY', alignment: 'chaotic', isQuestArtifact: true }, // Rogue
+  { name: 'Tsurugi of Muramasa', baseOtyp: 'TSURUGI', alignment: 'lawful', isQuestArtifact: true }, // Samurai
+  { name: 'Platinum Yendorian Express Card', baseOtyp: 'CREDIT_CARD', alignment: 'neutral', isQuestArtifact: true }, // Tourist
+  { name: 'Orb of Fate', baseOtyp: 'CRYSTAL_BALL', alignment: 'neutral', isQuestArtifact: true }, // Valkyrie
+  { name: 'Eye of the Aethiopica', baseOtyp: 'AMULET_OF_ESP', alignment: 'neutral', isQuestArtifact: true }, // Wizard
 ];
 
 export const ARTIFACTS_BY_NAME: Map<string, ArtifactDef> = new Map(
