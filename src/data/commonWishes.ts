@@ -44,6 +44,14 @@ export const COMMON_WISHES: CommonWish[] = [
   { text: 'broken glass', label: 'Deliberately not a real item', group: 'Edge cases' },
   { text: 'paperback spellbook', label: 'Deliberately rejected combination', group: 'Edge cases' },
 
+  // Broken wishes
+  { text: 'blessed greased +2 gray scale mail', label: 'Drop "dragon" and every qualifier is discarded for a totally random item', group: 'Broken wishes' },
+  { text: 'gray dragon scale mail of gray dragon scale mail', label: 'Repeating the full name back-to-back breaks the match completely', group: 'Broken wishes' },
+  { text: 'blessed spellbook of spellbook of fireball', label: 'Doubled "of spellbook of" derails the match to a random spellbook', group: 'Broken wishes' },
+  { text: 'potion of holy unholy water', label: '"holy" and "unholy" collide -- the cursed synonym silently wins', group: 'Broken wishes' },
+  { text: '2 amulet of yendor', label: 'Ambiguous match can hand you the fake instead of the real Amulet of Yendor', group: 'Broken wishes' },
+  { text: '+2 +3 dagger', label: 'Stack two enchantment prefixes and only the last one wins', group: 'Broken wishes' },
+
   // Everyday items
   { text: 'blessed potion of object detection', label: 'Common utility potion', group: 'Everyday items' },
   { text: 'uncursed ring of slow digestion', label: 'Food-saving ring', group: 'Everyday items' },

@@ -50,6 +50,11 @@ app.innerHTML = `
       <a href="${NETHACK_TREE_URL}" target="_blank" rel="noopener noreferrer">${escapeHtml(NETHACK_VERSION)}</a>
       (the tagged release, not a moving branch) so line numbers stay accurate.
     </p>
+    <p>
+      <a href="https://github.com/gregglind/nethack-wish-parser" target="_blank" rel="noopener noreferrer">Source on GitHub</a>
+      &middot;
+      <a href="https://github.com/gregglind/nethack-wish-parser/issues" target="_blank" rel="noopener noreferrer">Report a bug</a>
+    </p>
   </footer>
 `;
 
