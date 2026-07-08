@@ -7,7 +7,7 @@ export function renderScopeNotice(): string {
       <li>The seeded PRNG here illustrates probabilities -- it is not a reimplementation of NetHack's own RNG, and does not reproduce any specific real game's rolls.</li>
       <li>Luck can't be derived from wish text, so it defaults to 0 -- set it manually with the Luck field to see how it shifts BUC, enchantment sign, erosion-proofing, and poison probabilities.</li>
       <li>Wizard-mode terrain/trap wishes create a dungeon feature or floor trap, not an inventory object -- shown as a description rather than the full object field-dump.</li>
-      <li>The curated object database (~140 items) covers every class and every item referenced by the example wishes, but is not the full ~450-object table.</li>
+      <li>The object database is the full, mechanically-extracted ~450-entry <code>objects[]</code> table from <code>include/objects.h</code> -- not a hand-picked subset.</li>
     </ul>
   </details>`;
 }

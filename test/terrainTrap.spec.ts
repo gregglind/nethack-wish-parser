@@ -4,8 +4,11 @@ import { runWishPipeline } from '../src/parser/pipeline';
 describe('wizard-mode terrain/trap wishes', () => {
   it('resolves "bear trap" as the disarmed object by default', () => {
     const result = runWishPipeline('bear trap', 1);
-    expect(result.wizardObject.xname).toContain('bear trap');
-    expect(result.normalObject.xname).toContain('bear trap');
+    // The disarmed BEARTRAP tool's real objects.h name is one word
+    // ("beartrap"); "bear trap" (the terrain-feature wording) only appears
+    // for the wizard-mode-only armed-trap path exercised below.
+    expect(result.wizardObject.xname).toContain('beartrap');
+    expect(result.normalObject.xname).toContain('beartrap');
     expect(result.wizardObject.xname).not.toContain('Creates');
   });
 

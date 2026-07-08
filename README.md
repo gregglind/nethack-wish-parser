@@ -21,7 +21,8 @@ exact line(s) of the real source.
   [NetHackWiki Wish page](https://nethackwiki.com/wiki/Wish#Common_wishes).
 
 See the in-app "What this tool simplifies" panel for known scope limitations
-(it does not model the full ~450-object/~400-monster/~46-artifact roster, and
+(the object table is the full, mechanically-extracted ~450-entry
+`objects[]` roster, but it does not model the full ~400-monster roster, and
 uses a seeded PRNG that illustrates probabilities rather than reproducing
 NetHack's own RNG).
 

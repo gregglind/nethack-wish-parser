@@ -4,6 +4,23 @@ import { O_RANGES } from '../data/oRanges';
 import type { Rng } from './rng';
 import { byOtyp } from './objectLookup';
 
+/**
+ * objects.h has no single generic "worthless piece of glass" otyp -- each
+ * color is its own real GEM_CLASS object (WORTHLESS_WHITE_GLASS, etc, 9
+ * total). Mirrors the real desc strings on those GEM() entries.
+ */
+const GLASS_COLOR_OTYP: Record<string, string> = {
+  white: 'WORTHLESS_WHITE_GLASS',
+  blue: 'WORTHLESS_BLUE_GLASS',
+  red: 'WORTHLESS_RED_GLASS',
+  'yellowish brown': 'WORTHLESS_YELLOWBROWN_GLASS',
+  orange: 'WORTHLESS_ORANGE_GLASS',
+  yellow: 'WORTHLESS_YELLOW_GLASS',
+  black: 'WORTHLESS_BLACK_GLASS',
+  green: 'WORTHLESS_GREEN_GLASS',
+  violet: 'WORTHLESS_VIOLET_GLASS',
+};
+
 export function readobjnamPostparse2(input: ParseState, rng: Rng): { state: ParseState; steps: ParseStep[]; rejected: string | null } {
   let s = { ...input };
   const steps: ParseStep[] = [];
@@ -62,25 +79,25 @@ export function readobjnamPostparse2(input: ParseState, rng: Rng): { state: Pars
       if (s.broken || /\bbroken\b/i.test(text)) {
         return { state: s, steps, rejected: '"broken glass" is not a real item -- glass is only wishable as worthless glass gems.' };
       }
-      const color = (glass[2] || '').trim();
+      const color = (glass[2] || '').trim().toLowerCase();
       if (!color) {
-        const GLASS_COLORS = ['red', 'orange', 'yellow', 'green', 'blue', 'violet', 'black', 'white', 'gray'];
-        const chosen = rng.pick(GLASS_COLORS);
-        s = { ...s, otyp: 'WORTHLESS_PIECE_OF_GLASS', oclass: 'gem', dn: `worthless piece of ${chosen} glass` };
+        const chosen = rng.pick(Object.keys(GLASS_COLOR_OTYP));
+        const reconstructed = `worthless piece of ${chosen} glass`;
+        s = { ...s, otyp: GLASS_COLOR_OTYP[chosen], oclass: 'gem', dn: reconstructed };
         steps.push({
           id: 'postparse2:glass-random',
           stage: 'postparse2',
           title: 'Bare "glass" -> random glass-gem color',
           matched: true,
           inputBefore: before,
-          inputAfter: `worthless piece of ${chosen} glass`,
-          stateDiff: { otyp: 'WORTHLESS_PIECE_OF_GLASS', oclass: 'gem' },
+          inputAfter: reconstructed,
+          stateDiff: { otyp: GLASS_COLOR_OTYP[chosen], oclass: 'gem' },
           sourceRef: SOURCE_REFS.postparse2Glass,
           category: 'resolve-random',
         });
-      } else {
+      } else if (GLASS_COLOR_OTYP[color]) {
         const reconstructed = `worthless piece of ${color} glass`;
-        s = { ...s, input: reconstructed, otyp: 'WORTHLESS_PIECE_OF_GLASS', oclass: 'gem', dn: reconstructed };
+        s = { ...s, input: reconstructed, otyp: GLASS_COLOR_OTYP[color], oclass: 'gem', dn: reconstructed };
         steps.push({
           id: 'postparse2:glass-colored',
           stage: 'postparse2',
@@ -88,9 +105,24 @@ export function readobjnamPostparse2(input: ParseState, rng: Rng): { state: Pars
           matched: true,
           inputBefore: before,
           inputAfter: reconstructed,
-          stateDiff: { otyp: 'WORTHLESS_PIECE_OF_GLASS', oclass: 'gem' },
+          stateDiff: { otyp: GLASS_COLOR_OTYP[color], oclass: 'gem' },
           sourceRef: SOURCE_REFS.postparse2Glass,
           category: 'lookup',
+        });
+      } else {
+        const reconstructed = `worthless piece of ${color} glass`;
+        s = { ...s, input: reconstructed, oclass: 'gem', dn: reconstructed };
+        steps.push({
+          id: 'postparse2:glass-colored-unknown',
+          stage: 'postparse2',
+          title: '"X glass" suffix (unrecognized color)',
+          matched: true,
+          inputBefore: before,
+          inputAfter: reconstructed,
+          stateDiff: { oclass: 'gem' },
+          sourceRef: SOURCE_REFS.postparse2Glass,
+          category: 'lookup',
+          notes: [`"${color}" isn't one of the real worthless-glass colors -- falls through to a random gem.`],
         });
       }
     }

@@ -51,6 +51,8 @@ export const COMMON_WISHES: CommonWish[] = [
   { text: 'potion of holy unholy water', label: '"holy" and "unholy" collide -- the cursed synonym silently wins', group: 'Broken wishes' },
   { text: '2 amulet of yendor', label: 'Ambiguous match can hand you the fake instead of the real Amulet of Yendor', group: 'Broken wishes' },
   { text: '+2 +3 dagger', label: 'Stack two enchantment prefixes and only the last one wins', group: 'Broken wishes' },
+  { text: 'firetrap', label: 'Drop the space from "fire trap" and it\'s a random item, not a trap', group: 'Broken wishes' },
+  { text: 'eyes', label: 'Looks like shorthand for an artifact -- resolves to something totally unrelated', group: 'Broken wishes' },
 
   // Everyday items
   { text: 'blessed potion of object detection', label: 'Common utility potion', group: 'Everyday items' },
