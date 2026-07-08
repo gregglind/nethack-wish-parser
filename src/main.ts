@@ -26,6 +26,10 @@ app.innerHTML = `
         <input id="wizard-toggle" type="checkbox" />
         <span>Wizard mode primary</span>
       </label>
+      <label class="luck-input" title="Luck can't be derived from wish text -- set it manually. Shifts several normal-play probabilities (BUC, enchantment sign, erosion-proofing, poison).">
+        <span>Luck</span>
+        <input id="luck-input" type="number" min="-13" max="13" step="1" value="0" />
+      </label>
       <button id="copy-link" type="button" title="Copy a shareable link to this exact parse">Copy link</button>
     </div>
     <div class="examples">${renderExamples()}</div>
@@ -51,6 +55,7 @@ app.innerHTML = `
 
 const input = qs<HTMLInputElement>(app, '#wish-input');
 const wizardToggle = qs<HTMLInputElement>(app, '#wizard-toggle');
+const luckInput = qs<HTMLInputElement>(app, '#luck-input');
 const copyLinkBtn = qs<HTMLButtonElement>(app, '#copy-link');
 const resultsEl = qs<HTMLDivElement>(app, '#results');
 const timelineEl = qs<HTMLDivElement>(app, '#timeline');
@@ -58,6 +63,7 @@ const timelineEl = qs<HTMLDivElement>(app, '#timeline');
 let state: AppState = readUrlState();
 input.value = state.wish;
 wizardToggle.checked = state.wizardPrimary;
+luckInput.value = String(state.luck);
 
 function render() {
   if (!state.wish.trim()) {
@@ -66,7 +72,7 @@ function render() {
     return;
   }
 
-  const result = runWishPipeline(state.wish);
+  const result = runWishPipeline(state.wish, undefined, state.luck);
   const wizardPanel = renderResultPanel('Wizard mode', result.wizardObject, state.wizardPrimary);
   const normalPanel = renderResultPanel('Normal play', result.normalObject, !state.wizardPrimary);
 
@@ -90,6 +96,12 @@ input.addEventListener('input', () => {
 
 wizardToggle.addEventListener('change', () => {
   state = { ...state, wizardPrimary: wizardToggle.checked };
+  sync();
+});
+
+luckInput.addEventListener('input', () => {
+  const parsed = Math.max(-13, Math.min(13, Math.round(Number(luckInput.value) || 0)));
+  state = { ...state, luck: parsed };
   sync();
 });
 

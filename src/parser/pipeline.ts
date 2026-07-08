@@ -61,8 +61,9 @@ function combinedStep(
   };
 }
 
-export function runWishPipeline(rawInput: string, seed?: number): WishResult {
+export function runWishPipeline(rawInput: string, seed?: number, luck = 0): WishResult {
   const effectiveSeed = seed ?? hashSeed(rawInput);
+  const clampedLuck = Math.max(-13, Math.min(13, luck));
   const lookupRng = new Rng(effectiveSeed);
   const outcomeRngNormal = new Rng(effectiveSeed + 1);
   const outcomeRngWizard = new Rng(effectiveSeed + 2); // deterministic paths don't actually consume this
@@ -163,8 +164,8 @@ export function runWishPipeline(rawInput: string, seed?: number): WishResult {
   const baseBuc: Buc = rollBaseBuc(lookupRng);
   const baseSpe = rollBaseEnchantment(state, lookupRng);
 
-  const wizardFields = resolveMode(state, 'wizard', outcomeRngWizard, baseBuc, baseSpe);
-  const normalFields = resolveMode(state, 'normal', outcomeRngNormal, baseBuc, baseSpe);
+  const wizardFields = resolveMode(state, 'wizard', outcomeRngWizard, baseBuc, baseSpe, clampedLuck);
+  const normalFields = resolveMode(state, 'normal', outcomeRngNormal, baseBuc, baseSpe, clampedLuck);
 
   // Mode substitution step (only interesting if it actually differs).
   if (wizardFields.otyp !== normalFields.otyp || wizardFields.rejectedNote || normalFields.rejectedNote) {
@@ -302,7 +303,8 @@ function resolveMode(
   mode: 'wizard' | 'normal',
   rng: Rng,
   baseBuc: Buc,
-  baseSpe: number
+  baseSpe: number,
+  luck: number
 ): ModeFields {
   const sub = applyModeSubstitution(state, mode);
   let workingState = { ...state, otyp: sub.otyp };
@@ -354,10 +356,10 @@ function resolveMode(
   }
 
   const quantityOutcome = resolveQuantity(workingState, mode, rng);
-  const enchantmentOutcome = resolveEnchantment(workingState, mode, rng, baseSpe, 0);
+  const enchantmentOutcome = resolveEnchantment(workingState, mode, rng, baseSpe, luck);
   const typeSpecific = resolveTypeSpecific(workingState, mode, rng, enchantmentOutcome.spe);
-  const bucOutcome = resolveBuc(workingState, mode, baseBuc, 0);
-  const erosionOutcome = resolveErosion(workingState, mode, 0);
+  const bucOutcome = resolveBuc(workingState, mode, baseBuc, luck);
+  const erosionOutcome = resolveErosion(workingState, mode, luck);
 
   const def = workingState.otyp ? byOtyp(workingState.otyp) : undefined;
 
@@ -370,7 +372,7 @@ function resolveMode(
     eroded2: erosionOutcome.eroded2,
     erodeproof: erosionOutcome.erodeproof,
     greased: workingState.isgreased,
-    poisoned: workingState.ispoisoned && !!def?.poisonable,
+    poisoned: workingState.ispoisoned && !!def?.poisonable && (mode === 'wizard' || luck >= 0),
     mntmp: typeSpecific.mntmp,
     mgend: workingState.mgend,
     halfeaten: workingState.halfeaten,

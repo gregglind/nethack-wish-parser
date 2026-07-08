@@ -111,6 +111,24 @@ code, .result-xname, input[type='text'] {
   white-space: nowrap;
 }
 
+.luck-input {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.luck-input input {
+  width: 3.5rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 0.3rem 0.4rem;
+  font-family: inherit;
+}
+
 #copy-link {
   background: var(--bg-alt);
   border: 1px solid var(--border);
