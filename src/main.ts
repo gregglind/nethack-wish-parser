@@ -5,6 +5,7 @@ import { renderResultPanel } from './ui/renderResult';
 import { renderExamples } from './ui/renderExamples';
 import { renderScopeNotice } from './ui/renderScopeNotice';
 import { escapeHtml, qs } from './ui/domHelpers';
+import { NETHACK_VERSION, NETHACK_TREE_URL } from './parser/sourceRefs';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
@@ -42,8 +43,8 @@ app.innerHTML = `
   <footer class="site-footer">
     <p>
       Source references pin to
-      <a href="https://github.com/NetHack/NetHack" target="_blank" rel="noopener noreferrer">NetHack/NetHack</a>
-      at a fixed commit so line numbers stay accurate even as upstream changes.
+      <a href="${NETHACK_TREE_URL}" target="_blank" rel="noopener noreferrer">${escapeHtml(NETHACK_VERSION)}</a>
+      (the tagged release, not a moving branch) so line numbers stay accurate.
     </p>
   </footer>
 `;
