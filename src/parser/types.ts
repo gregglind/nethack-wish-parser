@@ -95,6 +95,9 @@ export interface ParseState {
 
   isArtifact: boolean;
   artifactName: string | null;
+
+  /** Wizard-mode-only terrain/trap wish match (not an inventory object). */
+  terrainMatch: { kind: 'trap' | 'terrain'; name: string; note: string } | null;
 }
 
 export type PipelineStage =
@@ -106,6 +109,7 @@ export type PipelineStage =
   | 'postparse2'
   | 'postparse3'
   | 'construction'
+  | 'terrainTrap'
   | 'quantity'
   | 'enchantment'
   | 'typeSpecific'

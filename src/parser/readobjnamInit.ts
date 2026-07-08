@@ -50,6 +50,7 @@ export function readobjnamInit(input: string): { state: ParseState; step: ParseS
     zombify: false,
     isArtifact: false,
     artifactName: null,
+    terrainMatch: null,
   };
 
   const step: ParseStep = {

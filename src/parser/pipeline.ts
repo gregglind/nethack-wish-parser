@@ -15,7 +15,9 @@ import { rollBaseBuc, resolveBuc, type Buc } from './bucAssignment';
 import { resolveErosion } from './erosionAssignment';
 import { resolveTypeSpecific } from './typeSpecificResolution';
 import { resolveArtifactWish } from './artifactResolution';
+import { resolveBearTrapLandMineDisambiguation, resolveTerrainTrapWish } from './terrainTrapWish';
 import { renderObject, type FinalFields } from './xname';
+import { article } from './utils';
 import { byOtyp } from './objectLookup';
 import { ARTIFACTS_BY_NAME } from '../data/artifacts';
 
@@ -121,7 +123,11 @@ export function runWishPipeline(rawInput: string, seed?: number): WishResult {
     return buildGoldResult(rawInput, steps, pp1.goldShortCircuit.cnt);
   }
 
-  if (!state.otyp) {
+  const bearTrapCheck = resolveBearTrapLandMineDisambiguation(state);
+  state = bearTrapCheck.state;
+  if (bearTrapCheck.step) steps.push(bearTrapCheck.step);
+
+  if (!state.otyp && !state.terrainMatch) {
     const pp2 = readobjnamPostparse2(state, lookupRng);
     steps.push(...pp2.steps);
     state = pp2.state;
@@ -130,10 +136,20 @@ export function runWishPipeline(rawInput: string, seed?: number): WishResult {
     }
   }
 
-  if (!state.otyp) {
+  if (!state.otyp && !state.terrainMatch) {
     const pp3 = readobjnamPostparse3(state, lookupRng);
     steps.push(...pp3.steps);
     state = pp3.state;
+  }
+
+  if (!state.otyp && !state.oclass && !state.terrainMatch) {
+    const terrainCheck = resolveTerrainTrapWish(state);
+    state = terrainCheck.state;
+    if (terrainCheck.step) steps.push(terrainCheck.step);
+  }
+
+  if (state.terrainMatch) {
+    return buildTerrainResult(rawInput, steps, state.terrainMatch);
   }
 
   const construction = objectConstruction(state, lookupRng);
@@ -385,6 +401,31 @@ function buildFailure(input: string, steps: ParseStep[], reason: string): WishRe
     normalObject: { xname: reason, fields: [] },
     failed: true,
     failureReason: reason,
+  };
+}
+
+function buildTerrainResult(
+  input: string,
+  steps: ParseStep[],
+  terrainMatch: NonNullable<ParseState['terrainMatch']>
+): WishResult {
+  const kindLabel = terrainMatch.kind === 'trap' ? 'trap' : 'dungeon feature';
+  return {
+    input,
+    steps,
+    wizardObject: {
+      xname: `Creates ${article(terrainMatch.name)} ${terrainMatch.name} on the floor here (a ${kindLabel}, not an inventory item).`,
+      fields: [
+        { label: 'Kind', value: kindLabel },
+        { label: 'Feature', value: terrainMatch.name },
+        { label: 'Note', value: terrainMatch.note },
+      ],
+    },
+    normalObject: {
+      xname: 'Nothing fitting that description exists.',
+      fields: [{ label: 'Note', value: 'Terrain/trap wishes only exist in wizard mode.' }],
+    },
+    failed: false,
   };
 }
 

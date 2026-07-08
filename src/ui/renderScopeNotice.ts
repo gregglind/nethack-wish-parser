@@ -2,14 +2,12 @@ export function renderScopeNotice(): string {
   return `<details class="scope-notice">
     <summary>What this tool simplifies</summary>
     <ul>
-      <li>Wizard-mode terrain/trap wishes (bear traps, land mines, dungeon features) are not modeled.</li>
-      <li>Japanese item name aliases (wakizashi, ninja-to, etc.) are not modeled.</li>
-      <li>The full ~400-monster roster is not included -- corpses/statues/figurines/eggs use a curated ~50-monster subset.</li>
-      <li>Custom bones-file fruit names aren't reproducible from a bare string; only the default "slime mold" is recognized.</li>
-      <li>The full ~46-artifact roster is not included -- a curated subset of ~20 is modeled.</li>
-      <li>Pluralization uses a heuristic + exception list, not NetHack's exact <code>makesingular()</code>.</li>
+      <li>Custom bones-file fruit names aren't reproducible from a bare string (there's no persistent game state to read); only the default "slime mold" is recognized.</li>
+      <li>Pluralization uses a heuristic + exception list, not NetHack's exact <code>makesingular()</code> -- a handful of irregular monster plurals may look slightly off.</li>
       <li>The seeded PRNG here illustrates probabilities -- it is not a reimplementation of NetHack's own RNG, and does not reproduce any specific real game's rolls.</li>
-      <li>Luck is assumed to be 0 (it can't be derived from wish text); real Luck (-13..13) shifts several of the probabilities shown here.</li>
+      <li>Luck defaults to 0 (it can't be derived from wish text); real Luck (-13..13) shifts several of the probabilities shown here.</li>
+      <li>Wizard-mode terrain/trap wishes create a dungeon feature or floor trap, not an inventory object -- shown as a description rather than the full object field-dump.</li>
+      <li>The curated object database (~140 items) covers every class and every item referenced by the example wishes, but is not the full ~450-object table.</li>
     </ul>
   </details>`;
 }
