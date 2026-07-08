@@ -1,0 +1,16 @@
+import type { RenderedObject } from '../parser/types';
+import { escapeHtml } from './domHelpers';
+
+export function renderResultPanel(label: string, obj: RenderedObject, primary: boolean): string {
+  return `<div class="result-panel ${primary ? 'result-panel--primary' : ''}">
+    <div class="result-label">${escapeHtml(label)}</div>
+    <div class="result-xname">${escapeHtml(obj.xname)}</div>
+    ${
+      obj.fields.length
+        ? `<table class="result-fields">${obj.fields
+            .map((f) => `<tr><td>${escapeHtml(f.label)}</td><td>${escapeHtml(f.value)}</td></tr>`)
+            .join('')}</table>`
+        : ''
+    }
+  </div>`;
+}

@@ -1,0 +1,9 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+
+# Reference-only checkouts, not part of the deployed app
+/NetHack
+/Wiki
