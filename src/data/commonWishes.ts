@@ -48,6 +48,7 @@ export const COMMON_WISHES: CommonWish[] = [
 
   // Broken wishes
   { text: 'blessed greased +2 gray scale mail', label: 'Drop "dragon" and the wish fails outright -- "gray scale mail" matches nothing, wasting every qualifier', group: 'Broken wishes' },
+  { text: 'blessed greased +2 gray dragon mail', label: 'Drop "scale" and "gray dragon" is stripped as a monster-name prefix, leaving "mail" -- which coincidentally matches the scroll of mail', group: 'Broken wishes' },
   { text: 'gray dragon scale mail of gray dragon scale mail', label: 'Repeating the full name back-to-back breaks the match completely -- the wish fails', group: 'Broken wishes' },
   { text: 'blessed spellbook of spellbook of fireball', label: 'Doubled "of spellbook of" derails the match to a random spellbook', group: 'Broken wishes' },
   { text: '2 amulets of yendor', label: 'Pluralizing "amulet" breaks the deterministic match -- a genuine 50/50 real-or-fake gamble, even in wizard mode', group: 'Broken wishes' },

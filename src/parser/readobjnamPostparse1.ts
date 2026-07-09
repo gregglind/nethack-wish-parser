@@ -3,6 +3,41 @@ import { SOURCE_REFS } from './sourceRefs';
 import { makesingular } from './utils';
 import { SPELLINGS, normalizeBritishSpellings } from '../data/spellings';
 import { CLASS_NAME_WORDS, CLASS_NAME_EXCLUSIONS } from '../data/classNames';
+import { MONSTERS } from '../data/monsters';
+
+/** Literal prefixes objnam.c excludes so rank titles/item names aren't misread as monster names. */
+const MONSTER_PREFIX_STRIP_EXCEPTIONS = ['samurai sword', 'wizard lock', 'death wand', 'master key', 'ninja-to', 'magenta'];
+const MONSTER_PREFIX_STRIP_SUBSTRING_EXCLUSIONS = ['wand ', 'spellbook ', 'gauntlets ', 'gloves ', 'finger '];
+
+/**
+ * Mirrors objnam.c's "find corpse type w/o 'of'" longest-monster-name-prefix
+ * match (~4427-4462) -- the mechanism that lets "red dragon scale mail" or
+ * "yeti corpse" work, but that ALSO fires for any other leftover text a
+ * monster name happens to prefix ("gray dragon mail" -> mntmp=gray dragon,
+ * remainder "mail" -> coincidentally matches the scroll of mail's real
+ * name). Only strips if something non-empty remains afterward; a bare
+ * monster name with no referent is left alone (objnam.c's "no referent"
+ * check).
+ */
+function stripMonsterNamePrefix(text: string): { mntmp: string; rest: string } | null {
+  const lower = text.toLowerCase();
+  if (MONSTER_PREFIX_STRIP_EXCEPTIONS.some((ex) => lower.startsWith(ex))) return null;
+  if (MONSTER_PREFIX_STRIP_SUBSTRING_EXCLUSIONS.some((ex) => lower.includes(ex))) return null;
+
+  let best: { name: string; matchLen: number } | null = null;
+  for (const m of MONSTERS) {
+    for (const candidate of [m.name, m.plural].filter((c): c is string => !!c)) {
+      const cl = candidate.toLowerCase();
+      if (lower.startsWith(`${cl} `) && (!best || cl.length > best.matchLen)) {
+        best = { name: m.name, matchLen: cl.length };
+      }
+    }
+  }
+  if (!best) return null;
+  const rest = text.slice(best.matchLen + 1).trim();
+  if (!rest) return null; // no referent -- not really a monster prefix here
+  return { mntmp: best.name, rest };
+}
 
 export interface Postparse1Result {
   state: ParseState;
@@ -226,6 +261,23 @@ export function readobjnamPostparse1(input: ParseState): Postparse1Result {
           : ['No monster specified -- resolves to a random one of this kind.']
       );
       break;
+    }
+  }
+
+  // -- monster-name prefix stripping ("red dragon scale mail", "yeti corpse") --
+  // Runs even when nothing downstream will use mntmp; the leftover remainder
+  // still gets matched normally, which is what lets "gray dragon mail"
+  // (missing "scale") accidentally resolve to the unrelated scroll of mail.
+  if (!s.otyp) {
+    const hit = stripMonsterNamePrefix(text);
+    if (hit) {
+      const before = text;
+      text = hit.rest;
+      s = { ...s, input: text, mntmp: hit.mntmp };
+      pushStep(steps, 'postparse1:monster-prefix-strip', 'Monster-name prefix stripped', before, text, { mntmp: hit.mntmp }, SOURCE_REFS.postparse1Glob, [
+        `"${hit.mntmp}" is a recognized monster name prefixing the rest of the text -- stripped off, leaving "${text}" to be matched on its own.`,
+        'This is also how a stray monster name can accidentally reroute a wish to a totally unrelated object if what remains happens to match something else.',
+      ]);
     }
   }
 

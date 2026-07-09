@@ -369,12 +369,13 @@ function resolveMode(
   const enchantmentOutcome = resolveEnchantment(workingState, mode, rng, baseSpe, luck);
   const typeSpecific = resolveTypeSpecific(workingState, mode, rng, enchantmentOutcome.spe);
   const bucOutcome = resolveBuc(workingState, mode, baseBuc, luck);
-  const erosionOutcome = resolveErosion(workingState, mode, luck);
+  const finalState = { ...workingState, otyp: typeSpecific.otyp };
+  const erosionOutcome = resolveErosion(finalState, mode, luck);
 
-  const def = workingState.otyp ? byOtyp(workingState.otyp) : undefined;
+  const def = typeSpecific.otyp ? byOtyp(typeSpecific.otyp) : undefined;
 
   return {
-    otyp: workingState.otyp,
+    otyp: typeSpecific.otyp,
     quan: quantityOutcome.quan,
     spe: typeSpecific.spe,
     buc: bucOutcome.buc,

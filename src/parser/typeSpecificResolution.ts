@@ -1,8 +1,25 @@
 import type { ParseState } from './types';
-import { MONSTERS_BY_NAME } from '../data/monsters';
+import { MONSTERS, MONSTERS_BY_NAME } from '../data/monsters';
 import type { Rng } from './rng';
 
+const CORPSE_ELIGIBLE_MONSTERS = MONSTERS.filter((m) => m.hasCorpse && !m.isUnique);
+
+/** objnam.c:5275-5280 -- generic "scale mail" + a dragon-name mntmp becomes that dragon's scale mail. */
+const DRAGON_SCALE_MAIL_BY_MONSTER: Record<string, string> = {
+  'gray dragon': 'GRAY_DRAGON_SCALE_MAIL',
+  'gold dragon': 'GOLD_DRAGON_SCALE_MAIL',
+  'silver dragon': 'SILVER_DRAGON_SCALE_MAIL',
+  'red dragon': 'RED_DRAGON_SCALE_MAIL',
+  'white dragon': 'WHITE_DRAGON_SCALE_MAIL',
+  'orange dragon': 'ORANGE_DRAGON_SCALE_MAIL',
+  'black dragon': 'BLACK_DRAGON_SCALE_MAIL',
+  'blue dragon': 'BLUE_DRAGON_SCALE_MAIL',
+  'green dragon': 'GREEN_DRAGON_SCALE_MAIL',
+  'yellow dragon': 'YELLOW_DRAGON_SCALE_MAIL',
+};
+
 export interface TypeSpecificOutcome {
+  otyp: string | null;
   spe: number;
   mntmp: string | null;
   notes: string[];
@@ -21,10 +38,27 @@ export function resolveTypeSpecific(
   const notes: string[] = [];
   const wizard = mode === 'wizard';
   let mntmp = state.mntmp;
+  let otyp = state.otyp;
 
   switch (state.otyp) {
     case 'TIN': {
       if (state.contents !== 'spinach') spe = 0;
+      if (mntmp) {
+        const monster = MONSTERS_BY_NAME.get(mntmp.toLowerCase());
+        const blockedByUniqueness = !!monster?.isUnique && !wizard;
+        const blockedByNoCorpse = !monster || !monster.hasCorpse;
+        if (blockedByUniqueness || blockedByNoCorpse) {
+          const fallback = rng.pick(CORPSE_ELIGIBLE_MONSTERS);
+          notes.push(
+            !monster
+              ? `"${mntmp}" isn't a recognized monster -- the tin keeps the random content it was already given when created ("${fallback.name}" here, simplified from a full random monster roll).`
+              : blockedByUniqueness
+                ? `${mntmp} is unique -- outside wizard mode the wish can't target it, so the tin keeps its random creation-time content ("${fallback.name}" here) instead.`
+                : `${mntmp} leaves no corpse -- the tin keeps its random creation-time content ("${fallback.name}" here) instead.`
+          );
+          mntmp = fallback.name;
+        }
+      }
       break;
     }
     case 'TOWEL': {
@@ -68,6 +102,15 @@ export function resolveTypeSpecific(
       }
       break;
     }
+    case 'SCALE_MAIL': {
+      const dragonType = mntmp ? DRAGON_SCALE_MAIL_BY_MONSTER[mntmp.toLowerCase()] : undefined;
+      if (dragonType) {
+        notes.push(`"${mntmp}" prefix matched before "scale mail" -- upgrades the generic scale mail to ${mntmp} scale mail.`);
+        otyp = dragonType;
+        mntmp = null;
+      }
+      break;
+    }
     case 'WAN_WISHING': {
       if (!wizard) {
         spe = rng.rn2(10) ? -1 : 0;
@@ -79,5 +122,5 @@ export function resolveTypeSpecific(
     }
   }
 
-  return { spe, mntmp, notes };
+  return { otyp, spe, mntmp, notes };
 }

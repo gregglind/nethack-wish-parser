@@ -83,7 +83,10 @@ export function renderObject(fields: FinalFields): RenderedObject {
   } else if (fields.contents === 'empty' && def) {
     baseName = `empty ${baseName}`;
   }
-  if (fields.mntmp && (fields.otyp === 'CORPSE' || fields.otyp === 'STATUE' || fields.otyp === 'FIGURINE' || fields.otyp === 'TIN' || fields.otyp === 'EGG')) {
+  if (fields.mntmp && fields.otyp === 'TIN') {
+    // "tin of X meat" -- a different construction than corpse/statue/figurine/egg's "X <type>" (eat.c tin_details()).
+    baseName = `tin of ${fields.mntmp} meat`;
+  } else if (fields.mntmp && (fields.otyp === 'CORPSE' || fields.otyp === 'STATUE' || fields.otyp === 'FIGURINE' || fields.otyp === 'EGG')) {
     const genderPrefix = fields.mgend ? `${fields.mgend} ` : '';
     baseName = `${genderPrefix}${fields.mntmp} ${baseName}`;
   }

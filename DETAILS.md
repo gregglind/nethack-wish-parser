@@ -184,6 +184,60 @@ intentionally has no venom objects modeled (see the scope note in
 missing from this tool's single-character symbol table. All three are now
 handled in `src/parser/readobjnamPostparse1.ts`.
 
+## "gray dragon mail" (drop "scale") becomes a scroll of mail — confirmed against a real game session, not just source-reading
+
+This one was initially reported wrong: my first pass through the source
+concluded "gray dragon mail" simply fails, the same as "gray scale mail"
+(drop "dragon" instead). A real NetHack session proved that guess wrong —
+the wish yields `a greased stamped scroll` (unidentified `SCR_MAIL`), later
+confirmed as `a blessed greased scroll of mail`. Re-reading the source
+turned up the actual two-step mechanism:
+
+1. **`readobjnam_postparse1()`'s "find corpse type w/o 'of'" block**
+   (`objnam.c:4427-4462`, comment literally says *"red dragon scale mail,
+   yeti corpse"*) runs `name_to_monplus()` — a longest-prefix match against
+   every monster name — against the *entire* remaining text, not just
+   inside an explicit `corpse of`/`tin of` construct. `"gray dragon"` is a
+   real monster name and a prefix of `"gray dragon mail"`, so it gets
+   split off: `d->mntmp = PM_GRAY_DRAGON`, `d->bp` becomes `"mail"`.
+   Guarded by literal-prefix exceptions (`"samurai sword"`, `"wizard
+   lock"`, `"death wand"`, `"master key"`, `"ninja-to"`, `"magenta"`) and
+   substring exclusions (`"wand "`, `"spellbook "`, `"gauntlets "`,
+   `"gloves "`, `"finger "`) so those aren't misparsed the same way.
+2. The leftover `"mail"` then goes through the normal fuzzy name search
+   (`rnd_otyp_by_namedesc()` in `readobjnam_postparse3`) and matches
+   `SCR_MAIL` directly — its stored canonical name is literally `"mail"`
+   (`objects.h:1263`: `SCROLL("mail", "stamped", ...)`).
+
+The same mechanism is *also* how plain `"gray dragon scale mail"` actually
+works, which is not obvious from just reading the object table: stripping
+`"gray dragon"` the same way leaves `"scale mail"` — a real, separate,
+ordinary (non-dragon) armor object (`objects.h:583`,
+`ARMOR("scale mail", ...)`, `oc_prob 66`, mundane iron armor). That generic
+match is then *upgraded* to the specific dragon-colored variant by a later
+finalization step (`objnam.c:5275-5280`):
+
+```c
+case SCALE_MAIL:
+    /* Dragon mail - depends on the order of objects & dragons. */
+    if (d.mntmp >= PM_GRAY_DRAGON && d.mntmp <= PM_YELLOW_DRAGON)
+        d.otmp->otyp = GRAY_DRAGON_SCALE_MAIL + d.mntmp - PM_GRAY_DRAGON;
+```
+
+So "gray dragon scale mail" is never matched as one literal string at
+all — it's monster-prefix-stripped to "scale mail" (ordinary armor) and
+then re-colored based on the stripped-off monster name arithmetic
+(`mons[]`'s dragon ordering — gray, gold, silver, red, white, orange,
+black, blue, green, yellow — matches `objects.h`'s dragon-scale-mail
+ordering 1:1). Drop "scale" and there's no `SCALE_MAIL` object left to
+upgrade — the leftover "mail" just matches the unrelated scroll instead.
+
+This tool previously had no equivalent of the general prefix-stripping
+step at all (only literal `"X corpse"`/`"tin of X"`/etc. keyword patterns);
+added in `src/parser/readobjnamPostparse1.ts` (`stripMonsterNamePrefix`)
+plus the `SCALE_MAIL` → dragon-color upgrade in
+`src/parser/typeSpecificResolution.ts`.
+
 ## "poisoned daggers" is a stale wiki-ism — daggers/spears/javelins aren't poisonable in current NetHack
 
 The NetHack wiki's "Common wishes" page (this tool's curated-list source)
@@ -217,6 +271,42 @@ Qualifier showcase alone, the curated list has a dedicated "Poisoning"
 group (`src/data/commonWishes.ts`) pairing "3 uncursed poisoned darts"
 (works) directly against "3 uncursed poisoned daggers" (silently drops the
 qualifier), so the contrast is visible side by side.
+
+## "tin of a" / "tin of archon" — an unrecognized or no-corpse monster doesn't reject or echo back, it keeps the tin's random creation-time content
+
+`mksobj(TIN, ...)` (`mkobj.c:925-932`) always gives a fresh tin *some*
+content up front, before `readobjnam()` ever looks at what the player
+typed: 1-in-6 chance of spinach, otherwise up to 200 tries picking a random
+corpse-eligible monster via `rndmonnum()`. Only *afterward* does
+`readobjnam()` try to override that with whatever monster the player named
+(`objnam.c:5234-5243`):
+
+```c
+case TIN:
+    if (dead_species(d.mntmp, FALSE)) {
+        d.otmp->corpsenm = NON_PM; /* it's empty */
+    } else if ((!(mons[d.mntmp].geno & G_UNIQ) || wizard)
+               && !(svm.mvitals[d.mntmp].mvflags & G_NOCORPSE)
+               && mons[d.mntmp].cnutrit != 0) {
+        d.otmp->corpsenm = d.mntmp;
+    }
+    break;
+```
+
+Note there's no `else` branch. If the named monster doesn't qualify — not
+recognized, or `G_NOCORPSE` (no corpse, e.g. Archons), or unique outside
+wizard mode — the override is skipped entirely and the tin keeps whatever
+random content it already got from `mksobj()`. So "tin of a" (unparseable
+monster text) and "tin of archon" (a real monster with no corpse) both
+produce a tin of some unrelated, genuinely random monster's meat — never
+"empty," and never a literal echo of the unmatched text. This tool
+previously stored the raw unvalidated text as `mntmp` and printed it
+directly (`"an uncursed a tin"`, `"an uncursed archon tin"` — also using the
+wrong naming construction entirely; real tins are named "tin of X meat" per
+`eat.c`'s `tin_details()`, not "X tin" like corpses/statues/figurines).
+Fixed in `src/parser/typeSpecificResolution.ts` (validate + random
+corpse-eligible fallback, excluding unique monsters) and
+`src/parser/xname.ts` (naming format).
 
 ## The tool's BUC roll is class-agnostic; the real game's isn't
 
