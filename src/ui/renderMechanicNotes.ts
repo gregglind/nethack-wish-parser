@@ -28,6 +28,15 @@ const TOPICS: NoteTopic[] = [
     ],
   },
   {
+    title: 'Quantity',
+    points: [
+      'Non-stackable items (most weapons and armor, corpses/statues/figurines, eggs, tools like the magic marker or crystal ball) always resolve to a quantity of 1, no matter how large a count you ask for -- there\'s no "10" to honor in the first place.',
+      'Gold is the one uncapped-looking exception: wizard mode grants any amount requested; normal play silently clamps it to 5000.',
+      'For genuinely stackable items (arrows, daggers, spears, candles, and similar), wizard mode always grants the exact count requested. Normal play only guarantees this for small amounts -- up to 20 for ammo-like items, up to 7 for candles.',
+      'Beyond those thresholds (or for any other stackable item), normal play rolls rnd(6) against the requested count: if the request isn\'t comfortably smaller than the roll, you silently get just 1 of the item instead of the full amount -- a real, rerollable RNG outcome, not a guaranteed result.',
+    ],
+  },
+  {
     title: 'Poison',
     points: [
       'Only thrown ammo (arrows, crossbow bolts, darts, shuriken, boomerangs) can be poisoned. Daggers, spears, and javelins can\'t -- "poisoned" is silently dropped no matter how you ask.',
