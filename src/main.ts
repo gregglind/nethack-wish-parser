@@ -19,7 +19,7 @@ const app = document.querySelector<HTMLDivElement>("#app")!;
 
 app.innerHTML = `
   <header class="site-header">
-    <h1> Nethack Wish Parser (${escapeHtml(NETHACK_VERSION)})</h1>
+    <h1> Nethack Wish Commands Explained (${escapeHtml(NETHACK_VERSION)})</h1>
     <p class="tagline">
       Type a <code>#wish</code> string and see exactly how NetHack's real parser
       (<code>readobjnam()</code> in <code>src/objnam.c</code>) would walk through it,
@@ -112,7 +112,7 @@ function setExamplesHidden(hidden: boolean) {
   toggleExamplesBtn.setAttribute("aria-expanded", String(!hidden));
   localStorage.setItem(EXAMPLES_HIDDEN_KEY, String(hidden));
 }
-setExamplesHidden(localStorage.getItem(EXAMPLES_HIDDEN_KEY) === "true");
+setExamplesHidden(localStorage.getItem(EXAMPLES_HIDDEN_KEY) !== "false");
 
 function renderMatchedNote() {
   const matched = COMMON_WISHES_BY_TEXT.get(state.wish.trim().toLowerCase());
