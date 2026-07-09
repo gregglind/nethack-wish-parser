@@ -6,20 +6,22 @@ confirmed against the vendored NetHack 5.0.0 source in `NetHack/` (commit
 `16ff59115315917b93185d026aeefea06db9b0f4`, see `src/parser/sourceRefs.ts`)
 and is reflected in this tool's behavior.
 
-**"Broken wishes" vs. "Qualifier showcase" in the curated list:** a wish
-belongs in Broken wishes if it looks reasonable but silently fails to
-deliver what was asked, with zero feedback (the wish either fails outright,
-or hands back something unrelated/wrong with no indication anything went
+**"Unexpected and Broken" vs. "Qualifier showcase" in the curated list:** a
+wish belongs in Unexpected and Broken if it looks reasonable but silently
+fails to deliver what was asked, with zero feedback (the wish either fails
+outright, hands back something unrelated/wrong, or silently drops a
+qualifier the object doesn't support -- no indication anything went
 sideways). A wish belongs in Qualifier showcase if it demonstrates a real,
 deterministic precedence rule that still produces a coherent, intentional
 result (e.g. "last qualifier of a given kind wins" for repeated
 enchantment/BUC-like prefixes) — non-obvious, but not actually broken. Both
 "amulet of yendor" (singular, deterministic) and "potion of holy unholy
-water" / "+2 +3 dagger" (collision-resolution rules) were moved from Broken
-wishes into Qualifier showcase on that basis; the plural "2 amulets of
-yendor" went the other way. "3 uncursed poisoned daggers" got its own
-"Poisoning" group instead, paired against the working "poisoned darts"
-case (see below) since the contrast is the point.
+water" / "+2 +3 dagger" (collision-resolution rules) were moved from
+Unexpected and Broken into Qualifier showcase on that basis; the plural "2
+amulets of yendor" went the other way. "3 uncursed poisoned daggers" lives
+here too, paired right next to the working "3 uncursed poisoned darts" (see
+below) so the contrast reads in one place instead of a separate
+single-purpose "Poisoning" group.
 
 Two more groups exist for the same reason: "Randomness showcase" collects
 wishes that resolve to something random through five distinct mechanisms

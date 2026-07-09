@@ -66,18 +66,16 @@ export const COMMON_WISHES: CommonWish[] = [
   { text: '`', label: 'The display symbol for large stones -- random between boulder and statue (statue is ~9x likelier)', group: 'Other interesting wishes' },
   { text: '_', label: 'The display symbol for chains -- deterministically an iron chain (the only wishable member of that class)', group: 'Other interesting wishes' },
 
-  // Broken wishes
-  { text: 'blessed greased +2 gray scale mail', label: 'Drop "dragon" and the wish fails outright -- "gray scale mail" matches nothing, wasting every qualifier', group: 'Broken wishes' },
-  { text: 'blessed greased +2 gray dragon mail', label: 'Drop "scale" and "gray dragon" is stripped as a monster-name prefix, leaving "mail" -- which coincidentally matches the scroll of mail', group: 'Broken wishes' },
-  { text: 'gray dragon scale mail of gray dragon scale mail', label: 'Repeating the full name back-to-back breaks the match completely -- the wish fails', group: 'Broken wishes' },
-  { text: 'blessed spellbook of spellbook of fireball', label: 'Doubled "of spellbook of" derails the match to a random spellbook', group: 'Broken wishes' },
-  { text: '2 amulets of yendor', label: 'Pluralizing "amulet" breaks the deterministic match -- a genuine 50/50 real-or-fake gamble, even in wizard mode', group: 'Broken wishes' },
-  { text: 'firetrap', label: 'Drop the space from "fire trap" and the wish fails outright, not a trap', group: 'Broken wishes' },
-  { text: 'eyes', label: 'Looks like shorthand for an artifact, but it needs the full name -- the wish fails', group: 'Broken wishes' },
-
-  // Poisoning -- which weapons "poisoned" actually works on
-  { text: '3 uncursed poisoned darts', label: 'Works: thrown ammo (arrows, darts, bolts, shuriken, boomerangs) is poisonable', group: 'Poisoning' },
-  { text: '3 uncursed poisoned daggers', label: 'Broken: silently drops "poisoned" -- daggers/spears/javelins aren\'t poisonable in current NetHack', group: 'Poisoning' },
+  // Unexpected and Broken
+  { text: 'blessed greased +2 gray scale mail', label: 'Drop "dragon" and the wish fails outright -- "gray scale mail" matches nothing, wasting every qualifier', group: 'Unexpected and Broken' },
+  { text: 'blessed greased +2 gray dragon mail', label: 'Drop "scale" and "gray dragon" is stripped as a monster-name prefix, leaving "mail" -- which coincidentally matches the scroll of mail', group: 'Unexpected and Broken' },
+  { text: 'gray dragon scale mail of gray dragon scale mail', label: 'Repeating the full name back-to-back breaks the match completely -- the wish fails', group: 'Unexpected and Broken' },
+  { text: 'blessed spellbook of spellbook of fireball', label: 'Doubled "of spellbook of" derails the match to a random spellbook', group: 'Unexpected and Broken' },
+  { text: '2 amulets of yendor', label: 'Pluralizing "amulet" breaks the deterministic match -- a genuine 50/50 real-or-fake gamble, even in wizard mode', group: 'Unexpected and Broken' },
+  { text: 'firetrap', label: 'Drop the space from "fire trap" and the wish fails outright, not a trap', group: 'Unexpected and Broken' },
+  { text: 'eyes', label: 'Looks like shorthand for an artifact, but it needs the full name -- the wish fails', group: 'Unexpected and Broken' },
+  { text: '3 uncursed poisoned darts', label: 'Works, for contrast: thrown ammo (arrows, darts, bolts, shuriken, boomerangs) is poisonable', group: 'Unexpected and Broken' },
+  { text: '3 uncursed poisoned daggers', label: 'Broken: silently drops "poisoned" -- daggers/spears/javelins aren\'t poisonable in current NetHack', group: 'Unexpected and Broken' },
 
   // Everyday items
   { text: 'blessed potion of object detection', label: 'Common utility potion', group: 'Everyday items' },
