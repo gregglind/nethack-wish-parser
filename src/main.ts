@@ -28,7 +28,7 @@ app.innerHTML = `
       </label>
       <label class="luck-input" title="Luck can't be derived from wish text -- set it manually. Shifts several normal-play probabilities (BUC, enchantment sign, erosion-proofing, poison).">
         <span>Luck</span>
-        <input id="luck-input" type="number" min="-13" max="13" step="1" value="0" />
+        <input id="luck-input" type="number" min="-13" max="13" step="1" value="10" />
       </label>
       <button id="copy-link" type="button" title="Copy a shareable link to this exact parse">Copy link</button>
     </div>
