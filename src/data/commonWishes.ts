@@ -370,6 +370,41 @@ export const COMMON_WISHES: CommonWish[] = [
     broken: true,
   },
 
+  // Quantities -- normal play caps how many of a stackable item you
+  // actually get; wizard mode always grants the full requested count.
+  {
+    text: "10 wax candles",
+    label:
+      'Candles: up to 7 is always honored. 10 exceeds that threshold, so normal play falls back to the rnd(6) gate -- which can never succeed once the request is above 6, silently collapsing it to 1. Wizard mode always grants the full 10.',
+    group: "Quantities",
+    broken: true,
+    wizard: true,
+  },
+  {
+    text: "30 daggers",
+    label:
+      'Ammo-like items: up to 20 is always honored. 30 exceeds that, so normal play hits the same rnd(6) gate and always collapses to 1 -- wizard mode grants the full 30.',
+    group: "Quantities",
+    broken: true,
+    wizard: true,
+  },
+  {
+    text: "10 apples",
+    label:
+      "Ordinary stackable items outside the ammo/candle carve-outs are always subject to the rnd(6) gate in normal play, even for a modest count like 10 -- wizard mode always grants it in full.",
+    group: "Quantities",
+    broken: true,
+    wizard: true,
+  },
+  {
+    text: "9000 gold pieces",
+    label:
+      "Gold has its own cap, not the rnd(6) gate -- normal play silently clamps any request down to 5000; wizard mode is unlimited.",
+    group: "Quantities",
+    broken: true,
+    wizard: true,
+  },
+
   // Bad luck showcase -- normal play only (wizard mode is immune to all
   // four of these); clicking sets the Luck input, not just the wish text.
   {
@@ -441,6 +476,14 @@ export const COMMON_WISHES: CommonWish[] = [
     label:
       "The display symbol for large stones -- random between boulder and statue (statue is ~9x likelier)",
     group: "Other interesting wishes",
+    random: true,
+  },
+  {
+    text: "` of the oracle",
+    label:
+      "The monster name is stripped and held onto, but the class symbol still rolls its usual random boulder/statue pick first -- only applied if that roll actually lands on statue (~9 times out of 10), giving the Oracle's statue; the rest of the time you get a plain boulder and the Oracle is discarded. Statues have no uniqueness gate, so even a unique monster like the Oracle can appear this way.",
+    group: "Other interesting wishes",
+    random: true,
   },
   {
     text: "_",
