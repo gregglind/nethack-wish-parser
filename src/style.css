@@ -188,6 +188,7 @@ code, .result-xname, input[type='text'] {
 .matched-note {
   font-size: 0.82rem;
   color: var(--text-dim);
+  flex-basis: 100%;
 }
 .matched-note em {
   color: var(--accent);
