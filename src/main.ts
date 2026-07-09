@@ -140,6 +140,16 @@ roleInput.addEventListener('change', () => {
   sync();
 });
 
+app.querySelectorAll<HTMLButtonElement>('.info-icon').forEach((icon) => {
+  const description = icon.parentElement?.nextElementSibling;
+  if (!(description instanceof HTMLElement) || !description.classList.contains('group-description')) return;
+  icon.addEventListener('click', () => {
+    const expanded = icon.getAttribute('aria-expanded') === 'true';
+    icon.setAttribute('aria-expanded', String(!expanded));
+    description.hidden = expanded;
+  });
+});
+
 copyLinkBtn.addEventListener('click', async () => {
   const url = shareUrl(state);
   try {

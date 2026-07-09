@@ -21,8 +21,9 @@ export function renderExamples(): string {
     return `<div class="example-group">
       <div class="example-group-title">
         <span>${escapeHtml(group)}</span>
-        ${description ? `<span class="info-icon" tabindex="0" title="${escapeHtml(description)}">&#9432;</span>` : ''}
+        ${description ? `<button type="button" class="info-icon" aria-expanded="false" aria-label="What this section demonstrates">&#9432;</button>` : ''}
       </div>
+      ${description ? `<div class="group-description" hidden>${escapeHtml(description)}</div>` : ''}
       <div class="example-chips">
         ${items
           .map(

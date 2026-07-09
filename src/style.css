@@ -151,18 +151,39 @@ code, .result-xname, input[type='text'] {
   margin-bottom: 0.3rem;
 }
 .info-icon {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin-left: 0.35em;
-  font-size: 0.95em;
+  padding: 0.2rem 0.35rem;
+  min-width: 1.4em;
+  min-height: 1.4em;
+  font-size: 1rem;
   text-transform: none;
   letter-spacing: normal;
-  cursor: help;
-  opacity: 0.6;
+  background: none;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--text-dim);
+  opacity: 0.7;
 }
 .info-icon:hover,
-.info-icon:focus {
+.info-icon:focus,
+.info-icon[aria-expanded="true"] {
   opacity: 1;
   color: var(--accent);
+  background: var(--bg-alt);
+}
+.group-description {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.5rem 0.7rem;
+  margin: 0.3rem 0 0.5rem;
+  max-width: 60ch;
 }
 .example-chips {
   display: flex;
