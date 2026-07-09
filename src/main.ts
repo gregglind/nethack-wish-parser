@@ -38,13 +38,18 @@ app.innerHTML = `
           ${ROLES.map((r) => `<option value="${r}">${r}</option>`).join('')}
         </select>
       </label>
-      <button id="reroll" type="button" title="Pin a new random seed and re-run this exact wish text -- only changes anything if the result has an RNG component.">🎲 Reroll</button>
       <button id="copy-link" type="button" title="Copy a shareable link to this exact parse">Copy link</button>
     </div>
-    <div class="examples">${renderExamples()}</div>
+    <div class="examples-header">
+      <button id="toggle-examples" type="button" aria-expanded="true">Hide examples</button>
+    </div>
+    <div id="examples" class="examples">${renderExamples()}</div>
   </section>
 
   <section class="output-section">
+    <div class="results-toolbar">
+      <button id="reroll" type="button" title="Pin a new random seed and re-run this exact wish text -- only changes anything if the result has an RNG component.">🎲 Reroll</button>
+    </div>
     <div id="results" class="results"></div>
     <div class="timeline-wrap">
       <h2>Parse timeline</h2>
@@ -75,12 +80,23 @@ const rerollBtn = qs<HTMLButtonElement>(app, '#reroll');
 const copyLinkBtn = qs<HTMLButtonElement>(app, '#copy-link');
 const resultsEl = qs<HTMLDivElement>(app, '#results');
 const timelineEl = qs<HTMLDivElement>(app, '#timeline');
+const examplesEl = qs<HTMLDivElement>(app, '#examples');
+const toggleExamplesBtn = qs<HTMLButtonElement>(app, '#toggle-examples');
 
 let state: AppState = readUrlState();
 input.value = state.wish;
 wizardToggle.checked = state.wizardPrimary;
 luckInput.value = String(state.luck);
 roleInput.value = state.role ?? '';
+
+const EXAMPLES_HIDDEN_KEY = 'nethack-wish-parser:examplesHidden';
+function setExamplesHidden(hidden: boolean) {
+  examplesEl.hidden = hidden;
+  toggleExamplesBtn.textContent = hidden ? 'Show examples' : 'Hide examples';
+  toggleExamplesBtn.setAttribute('aria-expanded', String(!hidden));
+  localStorage.setItem(EXAMPLES_HIDDEN_KEY, String(hidden));
+}
+setExamplesHidden(localStorage.getItem(EXAMPLES_HIDDEN_KEY) === 'true');
 
 function render() {
   if (!state.wish.trim()) {
@@ -122,6 +138,10 @@ input.addEventListener('input', () => {
 rerollBtn.addEventListener('click', () => {
   state = { ...state, seed: Math.floor(Math.random() * 2 ** 31) };
   sync();
+});
+
+toggleExamplesBtn.addEventListener('click', () => {
+  setExamplesHidden(!examplesEl.hidden);
 });
 
 wizardToggle.addEventListener('change', () => {

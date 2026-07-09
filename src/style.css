@@ -129,7 +129,9 @@ code, .result-xname, input[type='text'] {
   font-family: inherit;
 }
 
-#copy-link {
+#copy-link,
+#reroll,
+#toggle-examples {
   background: var(--bg-alt);
   border: 1px solid var(--border);
   color: var(--text);
@@ -138,7 +140,23 @@ code, .result-xname, input[type='text'] {
   cursor: pointer;
   font-size: 0.85rem;
 }
-#copy-link:hover { border-color: var(--accent); }
+#copy-link:hover,
+#reroll:hover,
+#toggle-examples:hover { border-color: var(--accent); }
+
+.examples-header {
+  margin-bottom: 0.5rem;
+}
+#toggle-examples {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.7rem;
+}
+
+.results-toolbar {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 0.5rem;
+}
 
 .example-group {
   margin-bottom: 0.6rem;
