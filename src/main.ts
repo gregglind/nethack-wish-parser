@@ -9,6 +9,7 @@ import { renderTimeline } from "./ui/renderTimeline";
 import { renderResultPanel } from "./ui/renderResult";
 import { renderExamples, renderStarterStrip } from "./ui/renderExamples";
 import { renderScopeNotice } from "./ui/renderScopeNotice";
+import { renderMechanicNotes } from "./ui/renderMechanicNotes";
 import { escapeHtml, qs } from "./ui/domHelpers";
 import { NETHACK_VERSION, NETHACK_TREE_URL } from "./parser/sourceRefs";
 import { ROLES } from "./parser/types";
@@ -64,6 +65,10 @@ app.innerHTML = `
       <div id="timeline"></div>
     </div>
     ${renderScopeNotice()}
+  </section>
+
+  <section class="notes-section">
+    ${renderMechanicNotes()}
   </section>
 
   <footer class="site-footer">
@@ -233,7 +238,9 @@ app.querySelectorAll<HTMLButtonElement>(".chip").forEach((chip) => {
   chip.addEventListener("click", () => {
     const wish = chip.dataset.wish ?? "";
     input.value = wish;
-    state = { ...state, wish, seed: undefined };
+    const luckOverride = chip.dataset.luck !== undefined ? Number(chip.dataset.luck) : undefined;
+    if (luckOverride !== undefined) luckInput.value = String(luckOverride);
+    state = { ...state, wish, seed: undefined, luck: luckOverride ?? state.luck };
     sync();
   });
 });

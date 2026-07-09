@@ -8,6 +8,8 @@ export interface CommonWish {
   wizard?: boolean;
   /** This wish's result genuinely varies by RNG roll -- rerolling can change it. Rendered with a leading 🎲 on its chip. */
   random?: boolean;
+  /** Clicking this chip also sets the Luck input to this value -- the example only makes its point at this specific Luck. Rendered as a "🍀N" badge on its chip. */
+  luck?: number;
 }
 
 /**
@@ -196,7 +198,7 @@ export const COMMON_WISHES: CommonWish[] = [
   {
     text: "2 scrolls labeled whatever",
     label:
-      'Same mechanism plus quantity -- an arbitrary label never matches a real appearance, so this is a random scroll too, honoring the requested count of 2',
+      "Same mechanism plus quantity -- an arbitrary label never matches a real appearance, so this is a random scroll too, honoring the requested count of 2",
     group: "Qualifier showcase",
     random: true,
   },
@@ -273,6 +275,17 @@ export const COMMON_WISHES: CommonWish[] = [
       "No monster named -- a figurine always gets some random (non-human) monster at creation, never a blank one",
     group: "Randomness showcase",
     random: true,
+  },
+
+  // Bad luck showcase -- normal play only (wizard mode is immune to all
+  // four of these); clicking sets the Luck input, not just the wish text.
+  {
+    text: "blessed fireproof +3 long sword",
+    label:
+      'Negative Luck hits three qualifiers at once in normal play: "blessed" is forced to cursed, +3 flips to -3, and "fireproof" is silently denied -- wizard mode is unaffected by all three',
+    group: "Bad luck showcase",
+    wizard: true,
+    luck: -5,
   },
 
   // Wizard-only wishes -- these either only exist, or only give the real
@@ -391,4 +404,5 @@ export const STARTER_WISHES: string[] = [
   "armor", // randomness
   "figuring of an archon", // typo -> random ring
   "potion of holy unholy water", // qualifier collision / precedence rule
+  "blessed fireproof +3 long sword", // luck
 ];

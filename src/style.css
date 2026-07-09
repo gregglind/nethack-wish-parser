@@ -451,7 +451,8 @@ code, .result-xname, input[type='text'] {
 }
 .rng-prob { color: var(--purple); }
 
-.scope-notice {
+.scope-notice,
+.mechanic-notes {
   margin-top: 1.5rem;
   font-size: 0.8rem;
   color: var(--text-dim);
@@ -459,13 +460,51 @@ code, .result-xname, input[type='text'] {
   border-radius: 6px;
   padding: 0.5rem 0.8rem;
 }
-.scope-notice summary {
+.scope-notice summary,
+.mechanic-notes summary {
   cursor: pointer;
   color: var(--text);
 }
-.scope-notice ul {
+.scope-notice ul,
+.mechanic-notes ul {
   margin: 0.5rem 0 0;
   padding-left: 1.2rem;
+}
+.mechanic-notes li {
+  margin-bottom: 0.4rem;
+}
+.mechanic-notes li:last-child {
+  margin-bottom: 0;
+}
+.note-topic {
+  margin-top: 0.8rem;
+}
+.note-topic h4 {
+  margin: 0 0 0.3rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+.note-topic em {
+  color: var(--text);
+  font-style: normal;
+}
+.legend-icon {
+  display: inline-block;
+  min-width: 1.6em;
+  text-align: center;
+}
+.note-code {
+  margin: 0.4rem 0 0;
+  padding: 0.5rem 0.7rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text);
 }
 
 .site-footer {

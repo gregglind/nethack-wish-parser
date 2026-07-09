@@ -6,9 +6,11 @@ function renderChip(wish: CommonWish): string {
     wish.broken ? '<span class="chip-marker chip-marker--broken" aria-label="Broken">✗</span>' : '',
     wish.wizard ? '<span class="chip-marker chip-marker--wizard" aria-label="Wizard only">🧙</span>' : '',
     wish.random ? '<span class="chip-marker chip-marker--random" aria-label="Random">🎲</span>' : '',
+    wish.luck !== undefined ? `<span class="chip-marker chip-marker--luck" aria-label="Sets Luck to ${wish.luck}">🍀${wish.luck}</span>` : '',
   ].join('');
-  const classes = ['chip', wish.broken ? 'chip--broken' : '', wish.wizard ? 'chip--wizard' : '', wish.random ? 'chip--random' : ''].filter(Boolean).join(' ');
-  return `<button type="button" class="${classes}" data-wish="${escapeHtml(wish.text)}" title="${escapeHtml(wish.label)}">${markers}${escapeHtml(wish.text)}</button>`;
+  const classes = ['chip', wish.broken ? 'chip--broken' : '', wish.wizard ? 'chip--wizard' : '', wish.random ? 'chip--random' : '', wish.luck !== undefined ? 'chip--luck' : ''].filter(Boolean).join(' ');
+  const luckAttr = wish.luck !== undefined ? ` data-luck="${wish.luck}"` : '';
+  return `<button type="button" class="${classes}" data-wish="${escapeHtml(wish.text)}"${luckAttr} title="${escapeHtml(wish.label)}">${markers}${escapeHtml(wish.text)}</button>`;
 }
 
 /** The always-visible "greatest hits" strip -- one per teaching category, shown above the full (toggleable) example groups. */
@@ -30,6 +32,7 @@ const GROUP_DESCRIPTIONS: Record<string, string> = {
   'Wizard only': "Either don't exist at all outside wizard mode, or silently substitute a mundane item in normal play.",
   'Other interesting wishes': 'Single-character class symbols and other odds and ends worth knowing about.',
   'Unexpected and Broken': 'Looks reasonable, but silently fails to deliver what was asked -- no error, no warning, just the wrong (or no) result.',
+  'Bad luck showcase': 'Negative Luck silently denies qualifiers in normal play (forces cursed, flips high enchantment negative, denies erodeproofing/poison) -- wizard mode is immune to all of it. Clicking these chips also sets the Luck input.',
   'Everyday items': 'Common, unremarkable wand-of-wishing picks for routine play.',
 };
 
