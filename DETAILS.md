@@ -452,3 +452,74 @@ produce for a plain "amulet of yendor" (or most other classes). Flagged but
 **not yet fixed** — would require pulling the real per-class chance
 parameter into the object table, which touches BUC odds for every item in
 the tool, not just this one case.
+
+## Statues have no uniqueness/no-corpse/wizard gate at all — unlike corpse/tin/figurine
+
+Bare "statue" was falling through to a monster-less generic "an uncursed
+statue" in both modes — missing the same "never left blank" treatment that
+`mksobj()` already gives corpses/tins/figurines. Fixed by adding a `STATUE`
+case to `src/parser/typeSpecificResolution.ts` with a random-monster
+fallback for the no-monster-named case only.
+
+Named *unique* monsters are a different story from corpse/tin/figurine,
+though: the real corpsenm-finalization `switch` in `objnam.c` has no
+`G_UNIQ`/`G_NOCORPSE`/wizard-mode gate for `STATUE` at all —
+`case STATUE: d.otmp->corpsenm = d.mntmp;` runs unconditionally. So
+"statue of Medusa" (or any other unique monster) works identically in
+wizard mode and normal play, no denial either way — confirmed as correct,
+*not* a bug, and moved to "Qualifier showcase" rather than "Wizard only".
+
+## Egg wishes fail outright for an unrecognized monster — they don't fall back to a generic egg
+
+Every other corpse/statue/figurine/tin "X of `<monster>`" form in this
+tool relies on the generic monster-name strippers (`stripGenericOfMonster`/
+`stripMonsterNamePrefix` in `src/parser/readobjnamPostparse1.ts`), which
+only fire when the trailing text is an actually-recognized monster name —
+if it isn't, nothing matches at that point in the real parser either, and
+the wish falls through all the way to "Nothing fitting that description
+exists in the game." This tool's own pattern-matching block didn't
+previously enforce that: it treated *any* text between "egg of "/before
+" egg" as a valid `mntmp`, so "ant egg" (no monster is literally named
+"ant" — only "giant ant"/"fire ant"/"soldier ant" exist) incorrectly
+resolved to a generic egg instead of failing.
+
+Fixed by adding a monster-recognition gate right after extraction: unless
+the pattern is the one unconditional case in the real source (literal
+"tin of `<X>`", which sets `d->typ = TIN` regardless of whether `<X>` is
+recognized — every other tin/corpse/statue/figurine/egg form has no such
+unconditional handler), an unrecognized name now causes the whole pattern
+match to be skipped, same as the real parser falling through to failure.
+"giant ant egg" still works (recognized, real prefix); "mind flayer egg"
+still gives a generic egg (recognized monster, just not oviparous — a
+different failure mode than "not recognized at all").
+
+Separately, `can_be_hatched()` (`mon.c:5553-5572`) runs `little_to_big()`
+*before* checking oviparous-ness — "baby X" normalizes to the adult "X"
+that actually lays eggs, and the resulting egg is always described by the
+adult species either way. So "baby blue dragon egg" and "blue dragon egg"
+are the exact same wish; a wished dragon egg is never labeled "baby
+`<color>` dragon egg". Mirrored in the `EGG` case of
+`typeSpecificResolution.ts`.
+
+## Monster-name extraction needs longest-*prefix* matching, not an exact match on the whole phrase
+
+While sanity-checking the egg gate above against other pre-existing
+examples, "tin of orc meat" turned out to resolve to a *wrong* random
+monster (e.g. "an uncursed tin of fire ant meat") instead of "orc" — a
+pre-existing bug, not something the gate introduced. The real
+`name_to_mon()` (which every one of these "X of `<monster>`" forms
+ultimately calls) does a longest-monster-name-*prefix* match against the
+given text, same as `findLongestMonsterPrefix()` already does elsewhere in
+`readobjnamPostparse1.ts` for the generic strippers — it doesn't require
+the entire remaining string to equal a monster name verbatim. This tool's
+extraction for the dedicated corpse/statue/figurine/tin/egg patterns was
+doing an *exact* lookup against the whole captured phrase instead, so
+"orc meat" (captured whole from "tin of orc meat") never matched "orc" in
+`MONSTERS_BY_NAME`, and fell through to the tin's unrecognized-monster
+random fallback.
+
+Fixed by trying an exact match first (needed for multi-word names like
+"gnome ruler" that aren't literally a prefix-plus-trailing-word), then
+falling back to `findLongestMonsterPrefix()` on the captured text. "tin of
+orc", "tin of orc meat", and "orc tin" all now correctly resolve to "an
+uncursed tin of orc meat" in both modes.

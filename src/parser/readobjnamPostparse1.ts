@@ -3,7 +3,7 @@ import { SOURCE_REFS } from './sourceRefs';
 import { makesingular } from './utils';
 import { SPELLINGS, normalizeBritishSpellings } from '../data/spellings';
 import { CLASS_NAME_WORDS, CLASS_NAME_EXCLUSIONS } from '../data/classNames';
-import { MONSTERS } from '../data/monsters';
+import { MONSTERS, MONSTERS_BY_NAME } from '../data/monsters';
 
 /** Literal prefixes objnam.c excludes so rank titles/item names aren't misread as monster names. */
 const MONSTER_PREFIX_STRIP_EXCEPTIONS = ['samurai sword', 'wizard lock', 'death wand', 'master key', 'ninja-to', 'magenta'];
@@ -272,9 +272,39 @@ export function readobjnamPostparse1(input: ParseState): Postparse1Result {
       let mgend: Gender | null = null;
       if (monsterText) {
         const extracted = extractMonsterAndGender(monsterText);
-        mntmp = stripTrailingPossessive(extracted.monster);
+        const candidate = stripTrailingPossessive(extracted.monster);
         mgend = extracted.gender;
+        // Real name_to_mon() does a longest-monster-name-PREFIX match, not
+        // an exact match against the whole captured phrase -- "tin of orc
+        // meat" needs to recognize "orc" and discard the trailing "meat"
+        // the same way it would discard any other leftover text. Try an
+        // exact match first (handles multi-word names like "gnome ruler"
+        // that aren't a strict prefix-plus-trailing-word), then fall back
+        // to the longest real prefix.
+        if (MONSTERS_BY_NAME.has(candidate.toLowerCase())) {
+          mntmp = candidate;
+        } else {
+          const prefix = findLongestMonsterPrefix(`${candidate} `);
+          mntmp = prefix ? prefix.name : candidate;
+        }
       }
+
+      // Only literal "tin of <X>" has an unconditional handler in the real
+      // source (objnam.c's dedicated `strstri(d->bp, "tin of ")` branch) --
+      // it sets d->typ = TIN regardless of whether X is a recognized
+      // monster. Every other case (including "<X> tin" without "of", and
+      // "<X> corpse"/"<X> statue"/"<X> figurine"/"<X> egg" with or without
+      // "of") relies on the generic " of <monster>"/monster-name-prefix
+      // strippers, which only fire when X is an actual, recognized monster
+      // name -- if it's not, nothing matches here at all in the real game,
+      // and the wish falls through to fail ("ant egg" has no monster
+      // literally named "ant", so it never becomes an egg wish in the first
+      // place; "giant ant egg" does, since "giant ant" is a real monster).
+      const isUnconditionalTinOf = p.kind === 'tin' && !!ofMatch;
+      if (monsterText && mntmp && !isUnconditionalTinOf && !MONSTERS_BY_NAME.has(mntmp.toLowerCase())) {
+        continue;
+      }
+
       text = p.kind;
       s = { ...s, input: text, otyp: p.otyp, oclass: 'food', mntmp, mgend: mgend ?? s.mgend };
       pushStep(

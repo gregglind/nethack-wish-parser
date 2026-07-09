@@ -6,6 +6,7 @@ const EXPECTED_FAILURES = new Set([
   'blessed greased +2 gray scale mail',
   'firetrap',
   '3 poison darts',
+  'ant egg',
 ]);
 
 // Wizard-only wishes: expected to succeed in wizard mode but fail in normal

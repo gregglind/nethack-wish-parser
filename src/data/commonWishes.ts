@@ -307,6 +307,32 @@ export const COMMON_WISHES: CommonWish[] = [
     random: true,
   },
 
+  // Eggs
+  {
+    text: "ant egg",
+    label:
+      '"ant" alone isn\'t a real monster name (only "giant ant"/"fire ant"/"soldier ant" are) -- nothing to strip, so the whole wish fails outright',
+    group: "Eggs",
+    broken: true,
+  },
+  {
+    text: "giant ant egg",
+    label: '"giant ant" is recognized and lays eggs -- works as named',
+    group: "Eggs",
+  },
+  {
+    text: "mind flayer egg",
+    label:
+      "Recognized monster, but not oviparous -- substitutes a generic egg instead of failing",
+    group: "Eggs",
+  },
+  {
+    text: "baby blue dragon egg",
+    label:
+      'The hatch check normalizes "baby X" to the adult "X" that actually lays eggs -- identical to "blue dragon egg"',
+    group: "Eggs",
+  },
+
   // Bad luck showcase -- normal play only (wizard mode is immune to all
   // four of these); clicking sets the Luck input, not just the wish text.
   {

@@ -132,9 +132,22 @@ export function resolveTypeSpecific(
     }
     case 'EGG': {
       if (mntmp) {
-        const monster = MONSTERS_BY_NAME.get(mntmp.toLowerCase());
+        let monster = MONSTERS_BY_NAME.get(mntmp.toLowerCase());
+        // can_be_hatched() (mon.c:5553-5572) calls little_to_big() before
+        // checking oviparous-ness -- "baby X" normalizes to the adult "X"
+        // that actually lays eggs, and the egg ends up described by that
+        // adult species either way ("baby blue dragon egg" and "blue
+        // dragon egg" are the same wish).
+        if (mntmp.toLowerCase().startsWith('baby ')) {
+          const adult = MONSTERS_BY_NAME.get(mntmp.slice(5).toLowerCase());
+          if (adult) {
+            notes.push(`"${mntmp}" is the juvenile form -- eggs are described by the adult species that lays them ("${adult.name}").`);
+            mntmp = adult.name;
+            monster = adult;
+          }
+        }
         if (!monster || !monster.oviparous) {
-          notes.push(`"${mntmp ?? 'that monster'}" isn't oviparous -- substitutes a random egg type.`);
+          notes.push(`"${mntmp}" isn't oviparous -- substitutes a generic egg.`);
           mntmp = null;
         }
       }
