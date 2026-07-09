@@ -79,6 +79,14 @@ export const COMMON_WISHES: CommonWish[] = [
     group: "Unexpected and Broken",
     broken: true,
   },
+  {
+    text: "figurine of death",
+    label:
+      "Death is unique -- figurines deny unique monsters in every mode, unlike corpse/tin (which allow it in wizard mode) or statues (no uniqueness gate at all). Substitutes a random figurine instead.",
+    group: "Unexpected and Broken",
+    broken: true,
+    random: true,
+  },
 
   // Dragon scale mail
   {
@@ -545,4 +553,5 @@ export const STARTER_WISHES: string[] = [
   "blessed fireproof Platinum Yendorian Express Card", // denied as Tourist
   "ant egg", //
   "mind flayer egg",
+  "figurine of death", // broken: unique monsters always denied for figurines, in every mode
 ];
