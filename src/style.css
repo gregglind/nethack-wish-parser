@@ -155,8 +155,8 @@ code, .result-xname, input[type='text'] {
 }
 
 .examples-header {
-  margin-top: 0.6rem;
-  margin-bottom: 0.5rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1rem;
 }
 #toggle-examples {
   font-size: 0.78rem;
