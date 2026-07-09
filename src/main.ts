@@ -69,12 +69,13 @@ app.innerHTML = `
       <h2>Parse timeline</h2>
       <div id="timeline"></div>
     </div>
-    ${renderScopeNotice()}
   </section>
 
   <section class="notes-section">
     ${renderMechanicNotes()}
     ${renderTraitsReference()}
+    ${renderScopeNotice()}
+
   </section>
 
   <footer class="site-footer">

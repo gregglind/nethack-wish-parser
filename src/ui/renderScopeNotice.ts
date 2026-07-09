@@ -1,6 +1,6 @@
 export function renderScopeNotice(): string {
   return `<details class="scope-notice">
-    <summary>What this tool simplifies</summary>
+    <summary>Limitations and differences from Nethack</summary>
     <ul>
       <li>Custom bones-file fruit names aren't reproducible from a bare string (there's no persistent game state to read); only the default "slime mold" is recognized.</li>
       <li>Pluralization uses a heuristic + exception list, not NetHack's exact <code>makesingular()</code> -- a handful of irregular monster plurals may look slightly off.</li>
