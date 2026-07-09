@@ -1,19 +1,24 @@
-import { runWishPipeline } from './parser/pipeline';
-import { readUrlState, writeUrlState, shareUrl, type AppState } from './urlState';
-import { renderTimeline } from './ui/renderTimeline';
-import { renderResultPanel } from './ui/renderResult';
-import { renderExamples, renderStarterStrip } from './ui/renderExamples';
-import { renderScopeNotice } from './ui/renderScopeNotice';
-import { escapeHtml, qs } from './ui/domHelpers';
-import { NETHACK_VERSION, NETHACK_TREE_URL } from './parser/sourceRefs';
-import { ROLES } from './parser/types';
-import { COMMON_WISHES_BY_TEXT } from './data/commonWishes';
+import { runWishPipeline } from "./parser/pipeline";
+import {
+  readUrlState,
+  writeUrlState,
+  shareUrl,
+  type AppState,
+} from "./urlState";
+import { renderTimeline } from "./ui/renderTimeline";
+import { renderResultPanel } from "./ui/renderResult";
+import { renderExamples, renderStarterStrip } from "./ui/renderExamples";
+import { renderScopeNotice } from "./ui/renderScopeNotice";
+import { escapeHtml, qs } from "./ui/domHelpers";
+import { NETHACK_VERSION, NETHACK_TREE_URL } from "./parser/sourceRefs";
+import { ROLES } from "./parser/types";
+import { COMMON_WISHES_BY_TEXT } from "./data/commonWishes";
 
-const app = document.querySelector<HTMLDivElement>('#app')!;
+const app = document.querySelector<HTMLDivElement>("#app")!;
 
 app.innerHTML = `
   <header class="site-header">
-    <h1>🧞 NetHack Wish Parser</h1>
+    <h1>🧞 NetHack Wish Parser (${escapeHtml(NETHACK_VERSION)})</h1>
     <p class="tagline">
       Type a <code>#wish</code> string and see exactly how NetHack's real parser
       (<code>readobjnam()</code> in <code>src/objnam.c</code>) would walk through it,
@@ -36,7 +41,7 @@ app.innerHTML = `
         <span>Role</span>
         <select id="role-input">
           <option value="">(none selected)</option>
-          ${ROLES.map((r) => `<option value="${r}">${r}</option>`).join('')}
+          ${ROLES.map((r) => `<option value="${r}">${r}</option>`).join("")}
         </select>
       </label>
       <button id="copy-link" type="button" title="Copy a shareable link to this exact parse">Copy link</button>
@@ -75,52 +80,60 @@ app.innerHTML = `
   </footer>
 `;
 
-const input = qs<HTMLInputElement>(app, '#wish-input');
-const wizardToggle = qs<HTMLInputElement>(app, '#wizard-toggle');
-const luckInput = qs<HTMLInputElement>(app, '#luck-input');
-const roleInput = qs<HTMLSelectElement>(app, '#role-input');
-const rerollBtn = qs<HTMLButtonElement>(app, '#reroll');
-const copyLinkBtn = qs<HTMLButtonElement>(app, '#copy-link');
-const resultsEl = qs<HTMLDivElement>(app, '#results');
-const timelineEl = qs<HTMLDivElement>(app, '#timeline');
-const examplesEl = qs<HTMLDivElement>(app, '#examples');
-const toggleExamplesBtn = qs<HTMLButtonElement>(app, '#toggle-examples');
-const matchedNoteEl = qs<HTMLDivElement>(app, '#matched-example-note');
+const input = qs<HTMLInputElement>(app, "#wish-input");
+const wizardToggle = qs<HTMLInputElement>(app, "#wizard-toggle");
+const luckInput = qs<HTMLInputElement>(app, "#luck-input");
+const roleInput = qs<HTMLSelectElement>(app, "#role-input");
+const rerollBtn = qs<HTMLButtonElement>(app, "#reroll");
+const copyLinkBtn = qs<HTMLButtonElement>(app, "#copy-link");
+const resultsEl = qs<HTMLDivElement>(app, "#results");
+const timelineEl = qs<HTMLDivElement>(app, "#timeline");
+const examplesEl = qs<HTMLDivElement>(app, "#examples");
+const toggleExamplesBtn = qs<HTMLButtonElement>(app, "#toggle-examples");
+const matchedNoteEl = qs<HTMLDivElement>(app, "#matched-example-note");
 
 let state: AppState = readUrlState();
 input.value = state.wish;
 wizardToggle.checked = state.wizardPrimary;
 luckInput.value = String(state.luck);
-roleInput.value = state.role ?? '';
+roleInput.value = state.role ?? "";
 
-const EXAMPLES_HIDDEN_KEY = 'nethack-wish-parser:examplesHidden';
+const EXAMPLES_HIDDEN_KEY = "nethack-wish-parser:examplesHidden";
 function setExamplesHidden(hidden: boolean) {
   examplesEl.hidden = hidden;
-  toggleExamplesBtn.textContent = hidden ? 'Show more examples' : 'Hide examples';
-  toggleExamplesBtn.setAttribute('aria-expanded', String(!hidden));
+  toggleExamplesBtn.textContent = hidden
+    ? "Show more examples"
+    : "Hide examples";
+  toggleExamplesBtn.setAttribute("aria-expanded", String(!hidden));
   localStorage.setItem(EXAMPLES_HIDDEN_KEY, String(hidden));
 }
-setExamplesHidden(localStorage.getItem(EXAMPLES_HIDDEN_KEY) === 'true');
+setExamplesHidden(localStorage.getItem(EXAMPLES_HIDDEN_KEY) === "true");
 
 function renderMatchedNote() {
   const matched = COMMON_WISHES_BY_TEXT.get(state.wish.trim().toLowerCase());
   matchedNoteEl.hidden = !matched;
   matchedNoteEl.innerHTML = matched
     ? `📌 Curated example (<em>${escapeHtml(matched.group)}</em>): ${escapeHtml(matched.label)}`
-    : '';
+    : "";
 }
 
 function render() {
   if (!state.wish.trim()) {
-    resultsEl.innerHTML = '<p class="empty">Type a wish, or click an example below, to see the parse.</p>';
-    timelineEl.innerHTML = '';
+    resultsEl.innerHTML =
+      '<p class="empty">Type a wish, or click an example below, to see the parse.</p>';
+    timelineEl.innerHTML = "";
     matchedNoteEl.hidden = true;
     return;
   }
 
   renderMatchedNote();
 
-  const result = runWishPipeline(state.wish, state.seed, state.luck, state.role);
+  const result = runWishPipeline(
+    state.wish,
+    state.seed,
+    state.luck,
+    state.role,
+  );
   // A different seed for the same wish text/luck/role: if either xname
   // changes, this result has a genuine RNG component (not just re-hashing
   // the same deterministic outcome under a different number).
@@ -129,14 +142,26 @@ function render() {
   const wizardHasRng = probe.wizardObject.xname !== result.wizardObject.xname;
   const normalHasRng = probe.normalObject.xname !== result.normalObject.xname;
 
-  const wizardPanel = renderResultPanel('Wizard mode', result.wizardObject, state.wizardPrimary, wizardHasRng);
-  const normalPanel = renderResultPanel('Normal play', result.normalObject, !state.wizardPrimary, normalHasRng);
+  const wizardPanel = renderResultPanel(
+    "Wizard mode",
+    result.wizardObject,
+    state.wizardPrimary,
+    wizardHasRng,
+  );
+  const normalPanel = renderResultPanel(
+    "Normal play",
+    result.normalObject,
+    !state.wizardPrimary,
+    normalHasRng,
+  );
 
-  resultsEl.innerHTML = state.wizardPrimary ? wizardPanel + normalPanel : normalPanel + wizardPanel;
+  resultsEl.innerHTML = state.wizardPrimary
+    ? wizardPanel + normalPanel
+    : normalPanel + wizardPanel;
   timelineEl.innerHTML = renderTimeline(result.steps);
 
   if (result.failed) {
-    resultsEl.innerHTML += `<p class="failure-note">${escapeHtml(result.failureReason ?? 'Parse failed.')}</p>`;
+    resultsEl.innerHTML += `<p class="failure-note">${escapeHtml(result.failureReason ?? "Parse failed.")}</p>`;
   }
 }
 
@@ -145,61 +170,68 @@ function sync() {
   render();
 }
 
-input.addEventListener('input', () => {
+input.addEventListener("input", () => {
   state = { ...state, wish: input.value, seed: undefined };
   sync();
 });
 
-rerollBtn.addEventListener('click', () => {
+rerollBtn.addEventListener("click", () => {
   state = { ...state, seed: Math.floor(Math.random() * 2 ** 31) };
   sync();
 });
 
-toggleExamplesBtn.addEventListener('click', () => {
+toggleExamplesBtn.addEventListener("click", () => {
   setExamplesHidden(!examplesEl.hidden);
 });
 
-wizardToggle.addEventListener('change', () => {
+wizardToggle.addEventListener("change", () => {
   state = { ...state, wizardPrimary: wizardToggle.checked };
   sync();
 });
 
-luckInput.addEventListener('input', () => {
-  const parsed = Math.max(-13, Math.min(13, Math.round(Number(luckInput.value) || 0)));
+luckInput.addEventListener("input", () => {
+  const parsed = Math.max(
+    -13,
+    Math.min(13, Math.round(Number(luckInput.value) || 0)),
+  );
   state = { ...state, luck: parsed };
   sync();
 });
 
-roleInput.addEventListener('change', () => {
-  state = { ...state, role: (roleInput.value || null) as AppState['role'] };
+roleInput.addEventListener("change", () => {
+  state = { ...state, role: (roleInput.value || null) as AppState["role"] };
   sync();
 });
 
-app.querySelectorAll<HTMLButtonElement>('.info-icon').forEach((icon) => {
+app.querySelectorAll<HTMLButtonElement>(".info-icon").forEach((icon) => {
   const description = icon.parentElement?.nextElementSibling;
-  if (!(description instanceof HTMLElement) || !description.classList.contains('group-description')) return;
-  icon.addEventListener('click', () => {
-    const expanded = icon.getAttribute('aria-expanded') === 'true';
-    icon.setAttribute('aria-expanded', String(!expanded));
+  if (
+    !(description instanceof HTMLElement) ||
+    !description.classList.contains("group-description")
+  )
+    return;
+  icon.addEventListener("click", () => {
+    const expanded = icon.getAttribute("aria-expanded") === "true";
+    icon.setAttribute("aria-expanded", String(!expanded));
     description.hidden = expanded;
   });
 });
 
-copyLinkBtn.addEventListener('click', async () => {
+copyLinkBtn.addEventListener("click", async () => {
   const url = shareUrl(state);
   try {
     await navigator.clipboard.writeText(url);
     const original = copyLinkBtn.textContent;
-    copyLinkBtn.textContent = 'Copied!';
+    copyLinkBtn.textContent = "Copied!";
     setTimeout(() => (copyLinkBtn.textContent = original), 1200);
   } catch {
-    window.prompt('Copy this link:', url);
+    window.prompt("Copy this link:", url);
   }
 });
 
-app.querySelectorAll<HTMLButtonElement>('.chip').forEach((chip) => {
-  chip.addEventListener('click', () => {
-    const wish = chip.dataset.wish ?? '';
+app.querySelectorAll<HTMLButtonElement>(".chip").forEach((chip) => {
+  chip.addEventListener("click", () => {
+    const wish = chip.dataset.wish ?? "";
     input.value = wish;
     state = { ...state, wish, seed: undefined };
     sync();
