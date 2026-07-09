@@ -249,7 +249,10 @@ app.querySelectorAll<HTMLButtonElement>(".chip").forEach((chip) => {
     luckInput.value = String(luck);
     const role = (chip.dataset.role as AppState["role"] | undefined) ?? null;
     roleInput.value = role ?? "";
-    state = { ...state, wish, seed: undefined, luck, role };
+    // Same fresh random seed the Reroll button pins -- clicking a chip is
+    // itself a reroll, not just a reset to the wish text's default seed.
+    const seed = Math.floor(Math.random() * 2 ** 31);
+    state = { ...state, wish, seed, luck, role };
     sync();
   });
 });
