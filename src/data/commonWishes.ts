@@ -115,7 +115,7 @@ export const COMMON_WISHES: CommonWish[] = [
   {
     text: "blessed Platinum Yendorian Express Card",
     label:
-      "Neutral: magic resistance + telepathy + charging. The Tourist's own quest artifact -- always denied outside wizard mode at that role",
+      "Neutral: magic resistance + telepathy + charging. Allowed, because it's not the Wizard's quest artifact.",
     group: "Quest artifacts",
     role: "Wizard",
   },
