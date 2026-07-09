@@ -21,6 +21,20 @@ yendor" went the other way. "3 uncursed poisoned daggers" got its own
 "Poisoning" group instead, paired against the working "poisoned darts"
 case (see below) since the contrast is the point.
 
+Two more groups exist for the same reason: "Randomness showcase" collects
+wishes that resolve to something random through five distinct mechanisms
+(fully random class, random-within-class, `o_ranges` sub-range picks,
+unspecified worthless-glass color, and — as of the tin fix below — a tin's
+always-random creation-time content), and "Wizard only" collects wishes
+that either don't exist at all outside wizard mode (terrain/trap wishes)
+or silently substitute a mundane item in normal play (Candelabrum/Bell/Book
+of the Dead). "Edge cases" was renamed to "Other interesting wishes" and
+now holds the single-character class-symbol wishes (`0`, `` ` ``, `_`)
+alongside "nothing"; "broken glass" and "paperback spellbook" were dropped
+from the curated list entirely (both just reject with the same generic
+"Nothing fitting" message as any other unmatched text, once patched to use
+that real message — not distinctive enough to be worth curating).
+
 ## "amulet of yendor" is deterministic; "amulets of yendor" (plural) is a coin flip
 
 `objnam.c`'s `readobjnam_postparse1()` has a dedicated special case
@@ -306,7 +320,11 @@ wrong naming construction entirely; real tins are named "tin of X meat" per
 `eat.c`'s `tin_details()`, not "X tin" like corpses/statues/figurines).
 Fixed in `src/parser/typeSpecificResolution.ts` (validate + random
 corpse-eligible fallback, excluding unique monsters) and
-`src/parser/xname.ts` (naming format).
+`src/parser/xname.ts` (naming format). The same "no override -> keep the
+random creation-time content" logic applies when *no* monster is named at
+all (plain "tin") — `ismnum(d.mntmp)` is false either way — so bare "tin"
+was extended to the same fallback rather than rendering a contentless
+generic "tin".
 
 ## The tool's BUC roll is class-agnostic; the real game's isn't
 

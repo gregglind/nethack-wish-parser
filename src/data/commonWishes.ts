@@ -39,12 +39,32 @@ export const COMMON_WISHES: CommonWish[] = [
   { text: 'statue of a female gnome ruler', label: 'Corpse/statue-of monster + gender extraction', group: 'Qualifier showcase' },
   { text: 'tin of spinach', label: 'Special-cased tin contents', group: 'Qualifier showcase' },
   { text: 'potion of unholy water', label: '"unholy" as a beatitude synonym, inferred from a suffix', group: 'Qualifier showcase' },
-  { text: '0', label: 'The display symbol for iron balls (not a broken quantity) -- a working shorthand, deterministically an iron ball', group: 'Qualifier showcase' },
 
-  // Nothing / edge cases
-  { text: 'nothing', label: 'Preserve wishless conduct', group: 'Edge cases' },
-  { text: 'broken glass', label: 'Deliberately not a real item', group: 'Edge cases' },
-  { text: 'paperback spellbook', label: 'Deliberately rejected combination', group: 'Edge cases' },
+  // Randomness showcase -- wishes that resolve to something random rather than
+  // the specific thing you might expect, each via a different mechanism.
+  { text: 'blessed', label: 'No class/type at all -- fully random class (13-slot pool, food/spellbook 2x likely), then a rarity-weighted item within it', group: 'Randomness showcase' },
+  { text: 'armor', label: 'Class pinned down, no specific type -- rarity-weighted random item within the armor class', group: 'Randomness showcase' },
+  { text: 'blessed potion', label: 'Same as "armor", for potions -- BUC is honored, the specific potion is random', group: 'Randomness showcase' },
+  { text: 'bag', label: 'Exact class-phrase match (o_ranges) -- random within the bag sub-range (sack/oilskin sack/bag of holding/bag of tricks)', group: 'Randomness showcase' },
+  { text: 'dragon scale mail', label: 'No color given -- random dragon color (same monster-prefix-stripping machinery as the scroll-of-mail case)', group: 'Randomness showcase' },
+  { text: 'glass', label: 'No color given -- random pick among the 9 worthless-glass-gem colors', group: 'Randomness showcase' },
+  { text: 'tin', label: 'No monster named -- a tin always gets some random content at creation, never a blank one', group: 'Randomness showcase' },
+
+  // Wizard-only wishes -- these either only exist, or only give the real
+  // thing, when wizard mode is on; normal play gets a mundane substitute
+  // (or nothing at all).
+  { text: 'fire trap', label: 'Terrain/trap wishes only exist in wizard mode -- normal play gets "Nothing fitting that description exists"', group: 'Wizard only' },
+  { text: 'fountain', label: 'Same as "fire trap" -- creates a dungeon feature, wizard mode only', group: 'Wizard only' },
+  { text: 'altar', label: 'Same mechanism -- a wizard-only dungeon feature, not an inventory item', group: 'Wizard only' },
+  { text: 'Candelabrum of Invocation', label: 'The real thing only in wizard mode -- normal play silently substitutes a candle', group: 'Wizard only' },
+  { text: 'Bell of Opening', label: 'Real in wizard mode -- normal play substitutes a plain bell', group: 'Wizard only' },
+  { text: 'Book of the Dead', label: 'Real in wizard mode -- normal play substitutes a blank spellbook', group: 'Wizard only' },
+
+  // Other interesting wishes
+  { text: 'nothing', label: 'Preserve wishless conduct', group: 'Other interesting wishes' },
+  { text: '0', label: 'The display symbol for iron balls, not a broken quantity -- a working shorthand, deterministically an iron ball', group: 'Other interesting wishes' },
+  { text: '`', label: 'The display symbol for large stones -- random between boulder and statue (statue is ~9x likelier)', group: 'Other interesting wishes' },
+  { text: '_', label: 'The display symbol for chains -- deterministically an iron chain (the only wishable member of that class)', group: 'Other interesting wishes' },
 
   // Broken wishes
   { text: 'blessed greased +2 gray scale mail', label: 'Drop "dragon" and the wish fails outright -- "gray scale mail" matches nothing, wasting every qualifier', group: 'Broken wishes' },

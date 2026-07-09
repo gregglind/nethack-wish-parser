@@ -42,19 +42,22 @@ export function resolveTypeSpecific(
 
   switch (state.otyp) {
     case 'TIN': {
-      if (state.contents !== 'spinach') spe = 0;
-      if (mntmp) {
-        const monster = MONSTERS_BY_NAME.get(mntmp.toLowerCase());
+      if (state.contents !== 'spinach') {
+        spe = 0;
+        const monster = mntmp ? MONSTERS_BY_NAME.get(mntmp.toLowerCase()) : undefined;
         const blockedByUniqueness = !!monster?.isUnique && !wizard;
-        const blockedByNoCorpse = !monster || !monster.hasCorpse;
-        if (blockedByUniqueness || blockedByNoCorpse) {
+        const blockedByNoCorpse = !!mntmp && (!monster || !monster.hasCorpse);
+        const noneSpecified = !mntmp;
+        if (noneSpecified || blockedByUniqueness || blockedByNoCorpse) {
           const fallback = rng.pick(CORPSE_ELIGIBLE_MONSTERS);
           notes.push(
-            !monster
-              ? `"${mntmp}" isn't a recognized monster -- the tin keeps the random content it was already given when created ("${fallback.name}" here, simplified from a full random monster roll).`
-              : blockedByUniqueness
-                ? `${mntmp} is unique -- outside wizard mode the wish can't target it, so the tin keeps its random creation-time content ("${fallback.name}" here) instead.`
-                : `${mntmp} leaves no corpse -- the tin keeps its random creation-time content ("${fallback.name}" here) instead.`
+            noneSpecified
+              ? `No monster specified -- a tin always gets some random content the moment it's created (simplified from a full random monster roll, "${fallback.name}" here), it isn't left blank.`
+              : !monster
+                ? `"${mntmp}" isn't a recognized monster -- the tin keeps the random content it was already given when created ("${fallback.name}" here, simplified from a full random monster roll).`
+                : blockedByUniqueness
+                  ? `${mntmp} is unique -- outside wizard mode the wish can't target it, so the tin keeps its random creation-time content ("${fallback.name}" here) instead.`
+                  : `${mntmp} leaves no corpse -- the tin keeps its random creation-time content ("${fallback.name}" here) instead.`
           );
           mntmp = fallback.name;
         }
