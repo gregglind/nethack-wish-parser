@@ -6,6 +6,19 @@ confirmed against the vendored NetHack 5.0.0 source in `NetHack/` (commit
 `16ff59115315917b93185d026aeefea06db9b0f4`, see `src/parser/sourceRefs.ts`)
 and is reflected in this tool's behavior.
 
+**"Broken wishes" vs. "Qualifier showcase" in the curated list:** a wish
+belongs in Broken wishes if it looks reasonable but silently fails to
+deliver what was asked, with zero feedback (the wish either fails outright,
+or hands back something unrelated/wrong with no indication anything went
+sideways). A wish belongs in Qualifier showcase if it demonstrates a real,
+deterministic precedence rule that still produces a coherent, intentional
+result (e.g. "last qualifier of a given kind wins" for repeated
+enchantment/BUC-like prefixes) — non-obvious, but not actually broken. Both
+"amulet of yendor" (singular, deterministic) and "potion of holy unholy
+water" / "+2 +3 dagger" (collision-resolution rules) were moved from Broken
+wishes into Qualifier showcase on that basis; "3 uncursed poisoned daggers"
+and the plural "2 amulets of yendor" went the other way.
+
 ## "amulet of yendor" is deterministic; "amulets of yendor" (plural) is a coin flip
 
 `objnam.c`'s `readobjnam_postparse1()` has a dedicated special case
@@ -168,6 +181,39 @@ intentionally has no venom objects modeled (see the scope note in
 `src/data/objects.ts`). `` ` `` (`ROCK_CLASS`, boulder/statue) was also
 missing from this tool's single-character symbol table. All three are now
 handled in `src/parser/readobjnamPostparse1.ts`.
+
+## "poisoned daggers" is a stale wiki-ism — daggers/spears/javelins aren't poisonable in current NetHack
+
+The NetHack wiki's "Common wishes" page (this tool's curated-list source)
+lists "3 uncursed poisoned daggers" as a classic wand-of-wishing pick. In the
+pinned 5.0.0 source, `is_poisonable()` no longer matches daggers at all:
+
+```c
+#define is_poisonable(otmp)                          \
+    ((otmp->oclass == WEAPON_CLASS                   \
+      && objects[otmp->otyp].oc_skill >= -P_SHURIKEN \
+      && objects[otmp->otyp].oc_skill <= -P_BOW)     \
+     || permapoisoned(otmp))
+```
+
+(`include/obj.h:264-268`). The `oc_skill >= -P_SHURIKEN && <= -P_BOW` range
+only matches objects whose skill constant is stored *negative* in
+`objects.h` — the "multigen"/ammo weapons (`-P_BOW` for all arrow variants,
+`-P_CROSSBOW` for bolts, `-P_DART`, `-P_SHURIKEN`, `-P_BOOMERANG`). Daggers,
+spears, and javelins are melee weapons stored with a *positive* skill
+constant (`P_DAGGER`, `P_SPEAR`) and so fail the range check — they are
+simply not poisonable via wish (or via any other means) in this version.
+`readobjnam()`'s poison-setting code (~5327-5334) silently no-ops when
+`is_poisonable()` is false — no rejection, no message, the wish just quietly
+drops the "poisoned" qualifier and hands you a perfectly ordinary dagger.
+
+This tool's object table already modeled this correctly for every ammo type
+except `BOOMERANG`, which was missing its `poisonable: true` flag (now
+fixed in `src/data/objects.ts`) despite genuinely being poisonable
+(`-P_BOOMERANG`). The curated wish list's "poisoned daggers" example was
+changed to "poisoned darts" (`src/data/commonWishes.ts`, Qualifier
+showcase) and a `"3 uncursed poisoned daggers"` entry was added to Broken
+wishes instead, to demonstrate the silent no-op.
 
 ## The tool's BUC roll is class-agnostic; the real game's isn't
 
