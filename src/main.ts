@@ -53,7 +53,7 @@ app.innerHTML = `
     </div>
     ${renderStarterStrip()}
     <div class="examples-header">
-      <button id="toggle-examples" type="button" aria-expanded="true">Hide examples</button>
+      <button id="toggle-examples" type="button" aria-expanded="true">− Hide examples</button>
     </div>
     <div id="examples" class="examples">${renderExamples()}</div>
   </section>
@@ -113,8 +113,8 @@ const EXAMPLES_HIDDEN_KEY = "nethack-wish-parser:examplesHidden";
 function setExamplesHidden(hidden: boolean) {
   examplesEl.hidden = hidden;
   toggleExamplesBtn.textContent = hidden
-    ? "Show more examples"
-    : "Hide examples";
+    ? "+ Show more examples"
+    : "− Hide examples";
   toggleExamplesBtn.setAttribute("aria-expanded", String(!hidden));
   localStorage.setItem(EXAMPLES_HIDDEN_KEY, String(hidden));
 }
