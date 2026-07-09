@@ -1,4 +1,4 @@
-import type { Role } from '../parser/types';
+import type { Role } from "../parser/types";
 
 export interface CommonWish {
   text: string;
@@ -100,27 +100,36 @@ export const COMMON_WISHES: CommonWish[] = [
   // Quest artifacts
   {
     text: "blessed rustproof Eye of the Aethiopica",
-    label: "Neutral: magic resistance + energy regen + telepathy. The Wizard's own quest artifact -- always denied outside wizard mode at that role",
+    label:
+      "Neutral: magic resistance + energy regen + telepathy. The Wizard's own quest artifact -- always denied outside wizard mode at that role",
+    group: "Quest artifacts",
+  },
+  {
+    text: "blessed fireproof Platinum Yendorian Express Card",
+    label:
+      "Neutral: magic resistance + telepathy + charging. The Tourist's own quest artifact -- always denied outside wizard mode at that role",
+    group: "Quest artifacts",
+    role: "Tourist",
+    wizard: true,
+  },
+  {
+    text: "blessed Platinum Yendorian Express Card",
+    label:
+      "Neutral: magic resistance + telepathy + charging. The Tourist's own quest artifact -- always denied outside wizard mode at that role",
     group: "Quest artifacts",
     role: "Wizard",
   },
   {
-    text: "blessed fireproof Platinum Yendorian Express Card",
-    label: "Neutral: magic resistance + telepathy + charging. The Tourist's own quest artifact -- always denied outside wizard mode at that role",
-    group: "Quest artifacts",
-    role: "Tourist",
-  },
-  {
     text: "blessed Eyes of the Overworld",
-    label: "Neutral: astral vision + magic resistance. The Monk's own quest artifact -- always denied outside wizard mode at that role",
+    label:
+      "Neutral: astral vision + magic resistance. The Monk's own quest artifact -- always denied outside wizard mode at that role",
     group: "Quest artifacts",
-    role: "Monk",
   },
   {
     text: "blessed Orb of Fate",
-    label: "Neutral: half physical/spell damage. The Valkyrie's own quest artifact -- always denied outside wizard mode at that role",
+    label:
+      "Neutral: half physical/spell damage. The Valkyrie's own quest artifact -- always denied outside wizard mode at that role",
     group: "Quest artifacts",
-    role: "Valkyrie",
   },
 
   // Wand of wishing strategy
@@ -216,6 +225,12 @@ export const COMMON_WISHES: CommonWish[] = [
     group: "Qualifier showcase",
   },
   {
+    text: "statue of Medusa",
+    label:
+      "Unlike corpse/tin/figurine, statues have no uniqueness restriction at all -- this works identically in wizard mode and normal play, no denial either way",
+    group: "Qualifier showcase",
+  },
+  {
     text: "tin of spinach",
     label: "Special-cased tin contents",
     group: "Qualifier showcase",
@@ -281,6 +296,13 @@ export const COMMON_WISHES: CommonWish[] = [
     text: "figurine",
     label:
       "No monster named -- a figurine always gets some random (non-human) monster at creation, never a blank one",
+    group: "Randomness showcase",
+    random: true,
+  },
+  {
+    text: "statue",
+    label:
+      "No monster named -- a statue always gets some random monster at creation too, never a blank one",
     group: "Randomness showcase",
     random: true,
   },
@@ -413,4 +435,5 @@ export const STARTER_WISHES: string[] = [
   "figuring of an archon", // typo -> random ring
   "potion of holy unholy water", // qualifier collision / precedence rule
   "blessed fireproof +3 long sword", // luck
+  "blessed fireproof Platinum Yendorian Express Card", // denied as Tourist
 ];

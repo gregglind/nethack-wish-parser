@@ -4,6 +4,11 @@ import type { Rng } from './rng';
 
 const CORPSE_ELIGIBLE_MONSTERS = MONSTERS.filter((m) => m.hasCorpse && !m.isUnique);
 const FIGURINE_ELIGIBLE_MONSTERS = MONSTERS.filter((m) => !m.isHuman && !m.isUnique);
+// Statues have no uniqueness/human/no-corpse restriction at all (real
+// corpsenm-finalization has no gate for STATUE, unlike CORPSE/TIN/FIGURINE)
+// -- this pool is only used as the mksobj()-creation-time random fallback
+// when no monster was named, matching rndmonnum()'s usual non-unique bias.
+const STATUE_ELIGIBLE_MONSTERS = MONSTERS.filter((m) => !m.isUnique);
 
 /** objnam.c:5275-5280 -- generic "scale mail" + a dragon-name mntmp becomes that dragon's scale mail. */
 const DRAGON_SCALE_MAIL_BY_MONSTER: Record<string, string> = {
@@ -111,6 +116,18 @@ export function resolveTypeSpecific(
         );
         mntmp = fallback.name;
       }
+      break;
+    }
+    case 'STATUE': {
+      if (!mntmp) {
+        const fallback = rng.pick(STATUE_ELIGIBLE_MONSTERS);
+        notes.push(`No monster specified -- mksobj() always rolls a real random monster at creation ("${fallback.name}" here), it isn't left blank.`);
+        mntmp = fallback.name;
+      }
+      // Unlike CORPSE/TIN/FIGURINE, an explicitly named monster (even a
+      // unique one, e.g. Medusa) is never blocked here, in either mode --
+      // there's no G_UNIQ/G_NOCORPSE/wizard gate on STATUE in the real
+      // finalization switch.
       break;
     }
     case 'EGG': {
