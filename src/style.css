@@ -247,17 +247,25 @@ code, .result-xname, input[type='text'] {
 .chip-marker {
   margin-right: 0.3em;
 }
-/* .chip.chip--broken (2 classes) so this beats ".starter-strip .chip"'s
-   specificity and still wins when a broken/wizard example also appears
-   in the starter strip. */
-.chip.chip--broken {
-  border-color: var(--red);
+/* .chip.chip--X (2 classes) so these beat ".starter-strip .chip"'s
+   specificity and still apply when an example also appears in the starter
+   strip. Order matters for chips with more than one flag (e.g. broken +
+   random) -- later rules win, so broken's red is listed last to take
+   visual priority as the most important warning. */
+.chip.chip--wizard {
+  border-color: var(--accent);
+}
+.chip-marker--random {
+  color: var(--purple);
+}
+.chip.chip--random {
+  border-color: var(--purple);
 }
 .chip-marker--broken {
   color: var(--red);
 }
-.chip.chip--wizard {
-  border-color: var(--accent);
+.chip.chip--broken {
+  border-color: var(--red);
 }
 
 .output-section {

@@ -6,6 +6,8 @@ export interface CommonWish {
   broken?: boolean;
   /** The wizard-vs-normal split is the whole point of this example (only real, or only exists, in wizard mode). Rendered with a leading 🧙 on its chip. */
   wizard?: boolean;
+  /** This wish's result genuinely varies by RNG roll -- rerolling can change it. Rendered with a leading 🎲 on its chip. */
+  random?: boolean;
 }
 
 /**
@@ -34,6 +36,7 @@ export const COMMON_WISHES: CommonWish[] = [
       '"figuring" (typo for "figurine") ends in "ring" -- matches RING_CLASS via a pure suffix check, so this gives a random ring, not a figurine of anything',
     group: "Unexpected and Broken",
     broken: true,
+    random: true,
   },
   {
     text: "2 amulets of yendor",
@@ -41,6 +44,7 @@ export const COMMON_WISHES: CommonWish[] = [
       'Pluralizing "amulet" breaks the deterministic match -- a genuine 50/50 real-or-fake gamble, even in wizard mode',
     group: "Unexpected and Broken",
     broken: true,
+    random: true,
   },
   {
     text: "firetrap",
@@ -184,8 +188,17 @@ export const COMMON_WISHES: CommonWish[] = [
   },
   {
     text: "scrolls labeled QWERTY",
-    label: '"labeled" sets the unidentified appearance',
+    label:
+      '"labeled" sets the unidentified appearance -- but this tool (like the real game) can\'t know which real scroll a made-up label corresponds to this game, so it resolves to a random scroll',
     group: "Qualifier showcase",
+    random: true,
+  },
+  {
+    text: "2 scrolls labeled whatever",
+    label:
+      'Same mechanism plus quantity -- an arbitrary label never matches a real appearance, so this is a random scroll too, honoring the requested count of 2',
+    group: "Qualifier showcase",
+    random: true,
   },
   {
     text: "statue of a female gnome ruler",
@@ -210,48 +223,56 @@ export const COMMON_WISHES: CommonWish[] = [
     label:
       "No class/type at all -- fully random class (13-slot pool, food/spellbook 2x likely), then a rarity-weighted item within it",
     group: "Randomness showcase",
+    random: true,
   },
   {
     text: "armor",
     label:
       "Class pinned down, no specific type -- rarity-weighted random item within the armor class",
     group: "Randomness showcase",
+    random: true,
   },
   {
     text: "blessed potion",
     label:
       'Same as "armor", for potions -- BUC is honored, the specific potion is random',
     group: "Randomness showcase",
+    random: true,
   },
   {
     text: "bag",
     label:
       "Exact class-phrase match (o_ranges) -- random within the bag sub-range (sack/oilskin sack/bag of holding/bag of tricks)",
     group: "Randomness showcase",
+    random: true,
   },
   {
     text: "dragon scale mail",
     label:
       "No color given -- random dragon color (same monster-prefix-stripping machinery as the scroll-of-mail case)",
     group: "Randomness showcase",
+    random: true,
   },
   {
     text: "glass",
     label:
       "No color given -- random pick among the 9 worthless-glass-gem colors",
     group: "Randomness showcase",
+    random: true,
   },
   {
     text: "tin",
     label:
       "No monster named -- a tin always gets some random content at creation, never a blank one",
     group: "Randomness showcase",
+    random: true,
   },
   {
     text: "figurine",
     label:
       "No monster named -- a figurine always gets some random (non-human) monster at creation, never a blank one",
     group: "Randomness showcase",
+    random: true,
   },
 
   // Wizard-only wishes -- these either only exist, or only give the real
