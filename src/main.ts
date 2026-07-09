@@ -3,6 +3,7 @@ import {
   readUrlState,
   writeUrlState,
   shareUrl,
+  DEFAULT_LUCK,
   type AppState,
 } from "./urlState";
 import { renderTimeline } from "./ui/renderTimeline";
@@ -238,18 +239,17 @@ app.querySelectorAll<HTMLButtonElement>(".chip").forEach((chip) => {
   chip.addEventListener("click", () => {
     const wish = chip.dataset.wish ?? "";
     input.value = wish;
-    const luckOverride =
-      chip.dataset.luck !== undefined ? Number(chip.dataset.luck) : undefined;
-    if (luckOverride !== undefined) luckInput.value = String(luckOverride);
-    const roleOverride = chip.dataset.role as AppState["role"] | undefined;
-    if (roleOverride !== undefined) roleInput.value = roleOverride ?? "";
-    state = {
-      ...state,
-      wish,
-      seed: undefined,
-      luck: luckOverride ?? state.luck,
-      role: roleOverride ?? state.role,
-    };
+    // Every chip resets Luck/Role to the neutral defaults its label was
+    // written against, unless the chip itself carries an override -- so a
+    // prior example's Luck/Role never silently leaks into an unrelated one.
+    const luck =
+      chip.dataset.luck !== undefined
+        ? Number(chip.dataset.luck)
+        : DEFAULT_LUCK;
+    luckInput.value = String(luck);
+    const role = (chip.dataset.role as AppState["role"] | undefined) ?? null;
+    roleInput.value = role ?? "";
+    state = { ...state, wish, seed: undefined, luck, role };
     sync();
   });
 });
