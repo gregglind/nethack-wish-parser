@@ -104,7 +104,12 @@ export function renderObject(fields: FinalFields): RenderedObject {
 
   if (isPlural) {
     const words = parts[nameIndex].split(' ');
-    words[0] = pluralize(words[0]);
+    // "tin of X meat" has its head noun first ("tin"), but the
+    // monster-prefixed corpse/statue/figurine/egg construction
+    // ("giant ant egg") has it last -- pluralize whichever word is
+    // actually the noun, not always the first word of the phrase.
+    const pluralIndex = fields.otyp === 'TIN' ? 0 : words.length - 1;
+    words[pluralIndex] = pluralize(words[pluralIndex]);
     parts[nameIndex] = words.join(' ');
   }
 
