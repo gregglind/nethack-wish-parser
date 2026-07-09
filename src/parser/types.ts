@@ -225,4 +225,10 @@ export interface MonsterDef {
   isDragon: boolean;
   isPudding: boolean;
   genocidable: boolean;
+  /** cnutrit === 0 (monsters.h). TIN specifically requires nonzero nutrition
+   * on top of hasCorpse/uniqueness/G_NOCORPSE (objnam.c ~5236-5240) -- corpses
+   * have no such extra check. Wraith is the only monster in the roster where
+   * this actually differs from hasCorpse (a real corpse exists, but it can't
+   * be tinned). */
+  zeroNutrition?: boolean;
 }

@@ -53,8 +53,13 @@ export function resolveTypeSpecific(
         const monster = mntmp ? MONSTERS_BY_NAME.get(mntmp.toLowerCase()) : undefined;
         const blockedByUniqueness = !!monster?.isUnique && !wizard;
         const blockedByNoCorpse = !!mntmp && (!monster || !monster.hasCorpse);
+        // TIN has its own extra requirement on top of hasCorpse/uniqueness
+        // (objnam.c ~5236-5240): mons[].cnutrit must be nonzero. Wraith is
+        // the one monster in the roster with a real corpse (hasCorpse) that
+        // still fails this -- 0 nutrition means there's no meat to tin.
+        const blockedByZeroNutrition = !blockedByNoCorpse && !!monster?.zeroNutrition;
         const noneSpecified = !mntmp;
-        if (noneSpecified || blockedByUniqueness || blockedByNoCorpse) {
+        if (noneSpecified || blockedByUniqueness || blockedByNoCorpse || blockedByZeroNutrition) {
           const fallback = rng.pick(CORPSE_ELIGIBLE_MONSTERS);
           notes.push(
             noneSpecified
@@ -63,7 +68,9 @@ export function resolveTypeSpecific(
                 ? `"${mntmp}" isn't a recognized monster -- the tin keeps the random content it was already given when created ("${fallback.name}" here, simplified from a full random monster roll).`
                 : blockedByUniqueness
                   ? `${mntmp} is unique -- outside wizard mode the wish can't target it, so the tin keeps its random creation-time content ("${fallback.name}" here) instead.`
-                  : `${mntmp} leaves no corpse -- the tin keeps its random creation-time content ("${fallback.name}" here) instead.`
+                  : blockedByZeroNutrition
+                    ? `${mntmp} has zero nutrition -- even though it has a corpse, there's no meat to tin, so it keeps its random creation-time content ("${fallback.name}" here) instead.`
+                    : `${mntmp} leaves no corpse -- the tin keeps its random creation-time content ("${fallback.name}" here) instead.`
           );
           mntmp = fallback.name;
         }

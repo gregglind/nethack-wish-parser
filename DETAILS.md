@@ -579,3 +579,45 @@ Candelabrum ahead of the static lookup table and doing a real
 `objectConstruction()` already does weighted picks elsewhere), threading
 `rng` into `applyModeSubstitution()`. Wizard mode is unaffected -- it
 still always returns the real Candelabrum.
+
+## "tin of wraith meat" can't actually contain wraith -- TIN has a nutrition gate CORPSE doesn't
+
+`objnam.c`'s corpsenm-finalization switch (~5236-5240) has TIN check for
+one thing CORPSE never checks:
+
+```c
+case TIN:
+    if (dead_species(d.mntmp, FALSE)) {
+        d.otmp->corpsenm = NON_PM; /* it's empty */
+    } else if ((!(mons[d.mntmp].geno & G_UNIQ) || wizard)
+               && !(svm.mvitals[d.mntmp].mvflags & G_NOCORPSE)
+               && mons[d.mntmp].cnutrit != 0) {
+        d.otmp->corpsenm = d.mntmp;
+    }
+    break;
+case CORPSE:
+    if ((!(mons[d.mntmp].geno & G_UNIQ) || wizard)
+        && !(svm.mvitals[d.mntmp].mvflags & G_NOCORPSE)) {
+        ...
+```
+
+`mons[d.mntmp].cnutrit != 0` is checked for TIN but not for CORPSE. Cross-
+referencing every monster in `include/monsters.h` with `cnutrit == 0`
+(fog cloud, the vortices, the light/elemental monsters, barrow wight,
+wraith, Nazgul, the golems, ghost, shade, Juiblex, ...) against this
+project's `hasCorpse` flag turned up exactly one monster where the two
+disagree: **wraith**. Every other zero-nutrition monster already has
+`hasCorpse: false` in this project's data (matching their real
+`G_NOCORPSE`/incorporeal status), so they were already correctly excluded
+by the existing `blockedByNoCorpse` check. Wraith genuinely has a corpse
+(that's how "eating a wraith corpse raises your experience level with no
+nutrition gained" works) -- but it can't be *tinned*, specifically.
+
+Added a `zeroNutrition?: boolean` field to `MonsterDef`
+(`src/parser/types.ts`), set only on wraith
+(`src/data/monsters.ts`), and a `blockedByZeroNutrition` check in the
+`TIN` case of `src/parser/typeSpecificResolution.ts` (gated behind
+`!blockedByNoCorpse` so the notes don't contradict each other) --
+`"tin of wraith meat"` now correctly keeps its random creation-time
+content instead of deterministically becoming wraith meat. `"wraith
+corpse"` is unaffected, since `CORPSE` never had this check.

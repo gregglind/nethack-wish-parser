@@ -87,6 +87,14 @@ export const COMMON_WISHES: CommonWish[] = [
     broken: true,
     random: true,
   },
+  {
+    text: "tin of wraith meat",
+    label:
+      "Wraith has a real corpse, but tins have an extra requirement corpses don't: nonzero nutrition. A wraith corpse has none (that's why eating one raises your level instead of filling you up), so the tin can't hold it and keeps its random creation-time content instead.",
+    group: "Unexpected and Broken",
+    broken: true,
+    random: true,
+  },
 
   // Dragon scale mail
   {
@@ -554,4 +562,5 @@ export const STARTER_WISHES: string[] = [
   "ant egg", //
   "mind flayer egg",
   "figurine of death", // broken: unique monsters always denied for figurines, in every mode
+  "tin of wraith meat", // broken/random: zero-nutrition monster can't be tinned despite having a corpse
 ];

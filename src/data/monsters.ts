@@ -243,7 +243,7 @@ export const MONSTERS: MonsterDef[] = [
   { name: 'vampire mage', plural: 'vampire mages', hasCorpse: false, isUnique: false, isHuman: false, oviparous: false, isDragon: false, isPudding: false, genocidable: true },
   { name: 'Vlad the Impaler', plural: 'Vlad the Impalers', hasCorpse: false, isUnique: true, isHuman: false, oviparous: false, isDragon: false, isPudding: false, genocidable: false },
   { name: 'barrow wight', plural: 'barrow wights', hasCorpse: false, isUnique: false, isHuman: false, oviparous: false, isDragon: false, isPudding: false, genocidable: true },
-  { name: 'wraith', plural: 'wraiths', hasCorpse: true, isUnique: false, isHuman: false, oviparous: false, isDragon: false, isPudding: false, genocidable: true },
+  { name: 'wraith', plural: 'wraiths', hasCorpse: true, isUnique: false, isHuman: false, oviparous: false, isDragon: false, isPudding: false, genocidable: true, zeroNutrition: true },
   { name: 'Nazgul', plural: 'Nazguls', hasCorpse: false, isUnique: false, isHuman: false, oviparous: false, isDragon: false, isPudding: false, genocidable: true },
   { name: 'xorn', plural: 'xorns', hasCorpse: true, isUnique: false, isHuman: false, oviparous: false, isDragon: false, isPudding: false, genocidable: true },
   { name: 'monkey', plural: 'monkeys', hasCorpse: true, isUnique: false, isHuman: false, oviparous: false, isDragon: false, isPudding: false, genocidable: true },
