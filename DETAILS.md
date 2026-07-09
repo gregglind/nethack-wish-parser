@@ -16,8 +16,10 @@ result (e.g. "last qualifier of a given kind wins" for repeated
 enchantment/BUC-like prefixes) — non-obvious, but not actually broken. Both
 "amulet of yendor" (singular, deterministic) and "potion of holy unholy
 water" / "+2 +3 dagger" (collision-resolution rules) were moved from Broken
-wishes into Qualifier showcase on that basis; "3 uncursed poisoned daggers"
-and the plural "2 amulets of yendor" went the other way.
+wishes into Qualifier showcase on that basis; the plural "2 amulets of
+yendor" went the other way. "3 uncursed poisoned daggers" got its own
+"Poisoning" group instead, paired against the working "poisoned darts"
+case (see below) since the contrast is the point.
 
 ## "amulet of yendor" is deterministic; "amulets of yendor" (plural) is a coin flip
 
@@ -210,10 +212,11 @@ drops the "poisoned" qualifier and hands you a perfectly ordinary dagger.
 This tool's object table already modeled this correctly for every ammo type
 except `BOOMERANG`, which was missing its `poisonable: true` flag (now
 fixed in `src/data/objects.ts`) despite genuinely being poisonable
-(`-P_BOOMERANG`). The curated wish list's "poisoned daggers" example was
-changed to "poisoned darts" (`src/data/commonWishes.ts`, Qualifier
-showcase) and a `"3 uncursed poisoned daggers"` entry was added to Broken
-wishes instead, to demonstrate the silent no-op.
+(`-P_BOOMERANG`). Rather than filing this under either Broken wishes or
+Qualifier showcase alone, the curated list has a dedicated "Poisoning"
+group (`src/data/commonWishes.ts`) pairing "3 uncursed poisoned darts"
+(works) directly against "3 uncursed poisoned daggers" (silently drops the
+qualifier), so the contrast is visible side by side.
 
 ## The tool's BUC roll is class-agnostic; the real game's isn't
 

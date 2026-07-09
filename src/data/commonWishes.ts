@@ -28,7 +28,6 @@ export const COMMON_WISHES: CommonWish[] = [
 
   // Qualifier showcase
   { text: 'the blessed +1 gray dragon scale mail', label: 'Article + BUC + enchantment + color', group: 'Qualifier showcase' },
-  { text: '3 uncursed poisoned darts', label: 'Quantity + BUC + poisoned + stackable weapon', group: 'Qualifier showcase' },
   { text: 'potion of holy unholy water', label: '"holy"/"unholy" collide -- whichever is adjacent to "water" wins, not whichever came first', group: 'Qualifier showcase' },
   { text: '+2 +3 dagger', label: 'Stack two enchantment prefixes -- only the last one applies, same "last qualifier wins" rule as BUC/holy-water', group: 'Qualifier showcase' },
   { text: '2 amulet of yendor', label: 'Not ambiguous -- deterministically the real amulet in wizard mode, the real game\'s own anti-cheat swap in normal play', group: 'Qualifier showcase' },
@@ -54,7 +53,10 @@ export const COMMON_WISHES: CommonWish[] = [
   { text: '2 amulets of yendor', label: 'Pluralizing "amulet" breaks the deterministic match -- a genuine 50/50 real-or-fake gamble, even in wizard mode', group: 'Broken wishes' },
   { text: 'firetrap', label: 'Drop the space from "fire trap" and the wish fails outright, not a trap', group: 'Broken wishes' },
   { text: 'eyes', label: 'Looks like shorthand for an artifact, but it needs the full name -- the wish fails', group: 'Broken wishes' },
-  { text: '3 uncursed poisoned daggers', label: 'Silently drops "poisoned" -- daggers/spears/javelins aren\'t poisonable in current NetHack, only thrown ammo (arrows, darts, bolts, shuriken, boomerangs) is', group: 'Broken wishes' },
+
+  // Poisoning -- which weapons "poisoned" actually works on
+  { text: '3 uncursed poisoned darts', label: 'Works: thrown ammo (arrows, darts, bolts, shuriken, boomerangs) is poisonable', group: 'Poisoning' },
+  { text: '3 uncursed poisoned daggers', label: 'Broken: silently drops "poisoned" -- daggers/spears/javelins aren\'t poisonable in current NetHack', group: 'Poisoning' },
 
   // Everyday items
   { text: 'blessed potion of object detection', label: 'Common utility potion', group: 'Everyday items' },
