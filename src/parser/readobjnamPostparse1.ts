@@ -19,11 +19,9 @@ const MONSTER_PREFIX_STRIP_SUBSTRING_EXCLUSIONS = ['wand ', 'spellbook ', 'gaunt
  * monster name with no referent is left alone (objnam.c's "no referent"
  * check).
  */
-function stripMonsterNamePrefix(text: string): { mntmp: string; rest: string } | null {
+/** Longest monster name (or plural) that prefixes `text`, followed by a space -- the core of name_to_monplus(). */
+function findLongestMonsterPrefix(text: string): { name: string; matchLen: number } | null {
   const lower = text.toLowerCase();
-  if (MONSTER_PREFIX_STRIP_EXCEPTIONS.some((ex) => lower.startsWith(ex))) return null;
-  if (MONSTER_PREFIX_STRIP_SUBSTRING_EXCLUSIONS.some((ex) => lower.includes(ex))) return null;
-
   let best: { name: string; matchLen: number } | null = null;
   for (const m of MONSTERS) {
     for (const candidate of [m.name, m.plural].filter((c): c is string => !!c)) {
@@ -33,10 +31,41 @@ function stripMonsterNamePrefix(text: string): { mntmp: string; rest: string } |
       }
     }
   }
+  return best;
+}
+
+function stripMonsterNamePrefix(text: string): { mntmp: string; rest: string } | null {
+  const lower = text.toLowerCase();
+  if (MONSTER_PREFIX_STRIP_EXCEPTIONS.some((ex) => lower.startsWith(ex))) return null;
+  if (MONSTER_PREFIX_STRIP_SUBSTRING_EXCLUSIONS.some((ex) => lower.includes(ex))) return null;
+
+  const best = findLongestMonsterPrefix(text);
   if (!best) return null;
   const rest = text.slice(best.matchLen + 1).trim();
   if (!rest) return null; // no referent -- not really a monster prefix here
   return { mntmp: best.name, rest };
+}
+
+/**
+ * Mirrors objnam.c's generic " of <monster>" stripper (~4421-4424, comment
+ * says "figurine of an orc, tin of orc meat") -- unlike the dedicated
+ * corpse/statue/figurine/tin/egg regexes above, this doesn't require any
+ * specific keyword before "of"; ANY leading word works, including typos or
+ * garbage ("figuring of an archon"). Everything from " of " onward is
+ * discarded once a monster name is recognized just after it, regardless of
+ * what follows the monster name.
+ */
+function stripGenericOfMonster(text: string): { mntmp: string; rest: string } | null {
+  const lower = text.toLowerCase();
+  if (MONSTER_PREFIX_STRIP_SUBSTRING_EXCLUSIONS.some((ex) => lower.includes(ex))) return null;
+  const ofIdx = lower.indexOf(' of ');
+  if (ofIdx === -1) return null;
+  const before = text.slice(0, ofIdx).trim();
+  if (!before) return null;
+  const after = text.slice(ofIdx + 4).replace(/^(?:an?|the)\s+/i, '');
+  const best = findLongestMonsterPrefix(`${after} `); // reuse the space-terminated prefix matcher
+  if (!best) return null;
+  return { mntmp: best.name, rest: before };
 }
 
 export interface Postparse1Result {
@@ -264,11 +293,30 @@ export function readobjnamPostparse1(input: ParseState): Postparse1Result {
     }
   }
 
+  // -- generic "<anything> of <monster>" stripper ("figuring of an archon") --
+  // No specific keyword required before "of" -- a monster name recognized
+  // right after it is enough, and everything from " of " onward is discarded
+  // regardless of what remains before it.
+  if (!s.otyp) {
+    const hit = stripGenericOfMonster(text);
+    if (hit) {
+      const before = text;
+      text = hit.rest;
+      s = { ...s, input: text, mntmp: hit.mntmp };
+      pushStep(steps, 'postparse1:generic-of-monster-strip', 'Generic "of <monster>" stripped', before, text, { mntmp: hit.mntmp }, SOURCE_REFS.postparse1Glob, [
+        `"${hit.mntmp}" recognized right after "of" -- the whole "of ${hit.mntmp}..." tail is discarded, leaving just "${text}" to be matched on its own.`,
+      ]);
+    }
+  }
+
   // -- monster-name prefix stripping ("red dragon scale mail", "yeti corpse") --
   // Runs even when nothing downstream will use mntmp; the leftover remainder
   // still gets matched normally, which is what lets "gray dragon mail"
   // (missing "scale") accidentally resolve to the unrelated scroll of mail.
-  if (!s.otyp) {
+  // Guarded on !s.mntmp -- objnam.c only tries this "d->mntmp < LOW_PM", i.e.
+  // only if a monster name hasn't already been claimed by the generic
+  // "of <monster>" stripper above.
+  if (!s.otyp && !s.mntmp) {
     const hit = stripMonsterNamePrefix(text);
     if (hit) {
       const before = text;
@@ -400,7 +448,11 @@ export function readobjnamPostparse1(input: ParseState): Postparse1Result {
       for (const { word, oclass } of CLASS_NAME_WORDS) {
         const ofPrefix = new RegExp(`^${word}s? of (.+)$`, 'i').exec(text);
         const prefix = new RegExp(`^${word}s?\\s+(.+)$`, 'i').exec(text);
-        const suffix = new RegExp(`^(.+)\\s+${word}s?$`, 'i').exec(text);
+        // Real objnam.c does a pure suffix comparison here (BSTRCMPI, no word
+        // boundary) -- "figuring" ends in "ring" and matches RING_CLASS even
+        // though there's no space before it. Faithfully reproducing that is
+        // what makes "figuring of an archon" give a random ring.
+        const suffix = new RegExp(`^(.+)${word}s?$`, 'i').exec(text);
         const bare = new RegExp(`^${word}s?$`, 'i').exec(text.trim());
         let actualn: string | null = null;
         let matchedForm: string | null = null;
@@ -413,8 +465,10 @@ export function readobjnamPostparse1(input: ParseState): Postparse1Result {
           actualn = text.trim();
           matchedForm = `${word} X`;
         } else if (suffix) {
-          actualn = text.trim();
-          matchedForm = `X ${word}`;
+          // Real objnam.c truncates bp right at the suffix match and doesn't
+          // preserve the remainder as an actualn to search for -- it just
+          // falls through to a random pick within the now-known class.
+          matchedForm = `X${word}`;
         }
         if (matchedForm) {
           const before = text;

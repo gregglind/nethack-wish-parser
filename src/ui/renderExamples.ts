@@ -1,5 +1,20 @@
-import { COMMON_WISHES, COMMON_WISH_GROUPS } from '../data/commonWishes';
+import { COMMON_WISHES, COMMON_WISH_GROUPS, COMMON_WISHES_BY_TEXT, STARTER_WISHES, type CommonWish } from '../data/commonWishes';
 import { escapeHtml } from './domHelpers';
+
+function renderChip(wish: CommonWish): string {
+  const marker = wish.broken ? '<span class="chip-marker chip-marker--broken" aria-label="Broken">✗</span>' : wish.wizard ? '<span class="chip-marker chip-marker--wizard" aria-label="Wizard only">🧙</span>' : '';
+  const classes = ['chip', wish.broken ? 'chip--broken' : '', wish.wizard ? 'chip--wizard' : ''].filter(Boolean).join(' ');
+  return `<button type="button" class="${classes}" data-wish="${escapeHtml(wish.text)}" title="${escapeHtml(wish.label)}">${marker}${escapeHtml(wish.text)}</button>`;
+}
+
+/** The always-visible "greatest hits" strip -- one per teaching category, shown above the full (toggleable) example groups. */
+export function renderStarterStrip(): string {
+  const chips = STARTER_WISHES.map((text) => COMMON_WISHES_BY_TEXT.get(text.toLowerCase()))
+    .filter((w): w is NonNullable<typeof w> => !!w)
+    .map((w) => renderChip(w))
+    .join('');
+  return `<div class="starter-strip">${chips}</div>`;
+}
 
 /** One-sentence explanation of what each curated group is demonstrating, shown via an info icon next to its heading. */
 const GROUP_DESCRIPTIONS: Record<string, string> = {
@@ -25,12 +40,7 @@ export function renderExamples(): string {
       </div>
       ${description ? `<div class="group-description" hidden>${escapeHtml(description)}</div>` : ''}
       <div class="example-chips">
-        ${items
-          .map(
-            (w) =>
-              `<button type="button" class="chip" data-wish="${escapeHtml(w.text)}" title="${escapeHtml(w.label)}">${escapeHtml(w.text)}</button>`
-          )
-          .join('')}
+        ${items.map((w) => renderChip(w)).join('')}
       </div>
     </div>`;
   }).join('');

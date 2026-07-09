@@ -153,6 +153,65 @@ Candelabrum, Bell of Opening, Book of the Dead) got the wrong outright
 of the correct silent substitute. Fixed by checking the substitution table
 first (`src/parser/objectConstruction.ts`).
 
+## "figuring of an archon" gives a random ring -- a typo for "figurine" that accidentally matches RING_CLASS
+
+Two separate real mechanisms compound here, both previously missing or
+subtly wrong in this tool:
+
+1. **The generic `"<anything> of <monster>"` stripper** (`objnam.c:4421-4424`,
+   comment literally says *"figurine of an orc, tin of orc meat"*) doesn't
+   require any specific keyword before "of" -- *any* leading text works,
+   typo or not:
+   ```c
+   } else if ((d->p = strstri(d->bp, " of ")) != 0
+              && ((d->mntmp = name_to_mon(d->p + 4, &d->mgend)) >= LOW_PM))
+       *d->p = 0;
+   ```
+   For `"figuring of an archon"`, this recognizes `"archon"` right after
+   " of " and discards everything from " of " onward, leaving just
+   `"figuring"` with `d->mntmp` set to Archon.
+2. **The class-name-word suffix check** (`objnam.c:4612`,
+   `if (!BSTRCMPI(d->bp, d->p - j, wrp[i]))`) is a pure suffix comparison
+   with **no word boundary at all** -- it just checks whether the last `j`
+   characters equal the class word. `"figuring"` ends in `"ring"`, so it
+   matches `RING_CLASS` exactly as if you'd typed `"... ring"` with a space.
+   With nothing left to match a specific ring name, it falls through to a
+   random ring.
+
+This tool previously had neither piece: no generic "of monster" stripper
+at all (only the literal-keyword `corpse`/`statue`/`figurine`/`tin`/`egg`
+regexes), and the suffix regex required `\s+` before the class word
+(`^(.+)\s+ring$`), which a bare `"figuring"` can never satisfy. Added
+`stripGenericOfMonster()` and fixed the suffix regex in
+`src/parser/readobjnamPostparse1.ts`.
+
+Implementing the generic stripper surfaced a second, unrelated bug in the
+monster-prefix-stripper added earlier for the scroll-of-mail case: real
+`objnam.c`'s "w/o of" stripper is guarded by `d->mntmp < LOW_PM` -- it only
+runs if a monster name hasn't *already* been claimed by the generic "of"
+stripper. Without that guard, `"gray dragon scale mail of gray dragon
+scale mail"` got double-stripped (once by each mechanism) and was
+previously miscategorized as a "the wish fails" broken example -- it
+actually succeeds in real NetHack (the same "gray dragon" gets peeled off
+twice, landing back on the identical real item). Fixed the guard and moved
+that curated entry out of Unexpected and Broken into Qualifier showcase.
+
+## Bare "figurine"/"corpse"/"tin" are never blank -- mksobj() always rolls *something* at creation
+
+Same root cause as the "tin of a" fix above, generalized: `mksobj()`
+unconditionally assigns a random monster to `FIGURINE` (`mkobj.c:1040-1047`,
+avoiding humans) and `CORPSE` (`mkobj.c:898-911`, up to 50 tries, falling
+back to a human corpse) the moment either is created -- there's no
+"blank" state for either type, matching what was already fixed for `TIN`.
+This tool's `CORPSE`/`FIGURINE` cases in `typeSpecificResolution.ts`
+previously only *cleared* `mntmp` to `null` on an invalid request (unique
+monster, human figurine, unrecognized name) instead of substituting a real
+random fallback, and did nothing at all when no monster was named. Fixed
+to roll a fallback the same way `TIN` does, with separate eligible-monster
+pools (`CORPSE_ELIGIBLE_MONSTERS`: has a corpse, not unique;
+`FIGURINE_ELIGIBLE_MONSTERS`: not human, not unique -- figurines have no
+wizard-mode exception for uniqueness, unlike corpses/tins).
+
 ## Unmatched non-empty text fails; the random-fallback only fires for genuinely empty text
 
 `readobjnam()`'s `any:` label (a uniformly random class, then a

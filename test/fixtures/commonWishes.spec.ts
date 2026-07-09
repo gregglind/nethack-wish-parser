@@ -4,9 +4,8 @@ import { runWishPipeline } from '../../src/parser/pipeline';
 
 const EXPECTED_FAILURES = new Set([
   'blessed greased +2 gray scale mail',
-  'gray dragon scale mail of gray dragon scale mail',
   'firetrap',
-  'eyes',
+  '3 poison darts',
 ]);
 
 // Wizard-only wishes: expected to succeed in wizard mode but fail in normal

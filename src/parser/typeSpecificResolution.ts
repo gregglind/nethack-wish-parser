@@ -3,6 +3,7 @@ import { MONSTERS, MONSTERS_BY_NAME } from '../data/monsters';
 import type { Rng } from './rng';
 
 const CORPSE_ELIGIBLE_MONSTERS = MONSTERS.filter((m) => m.hasCorpse && !m.isUnique);
+const FIGURINE_ELIGIBLE_MONSTERS = MONSTERS.filter((m) => !m.isHuman && !m.isUnique);
 
 /** objnam.c:5275-5280 -- generic "scale mail" + a dragon-name mntmp becomes that dragon's scale mail. */
 const DRAGON_SCALE_MAIL_BY_MONSTER: Record<string, string> = {
@@ -74,24 +75,41 @@ export function resolveTypeSpecific(
       break;
     }
     case 'CORPSE': {
-      if (mntmp) {
-        const monster = MONSTERS_BY_NAME.get(mntmp.toLowerCase());
-        if (!monster) {
-          notes.push(`"${mntmp}" isn't a recognized monster in this tool's curated list -- treated as a random corpse.`);
-          mntmp = null;
-        } else if (monster.isUnique || !monster.hasCorpse) {
-          notes.push(`${mntmp} is unique or leaves no corpse -- normal NetHack would substitute a random corpse instead.`);
-        }
+      const monster = mntmp ? MONSTERS_BY_NAME.get(mntmp.toLowerCase()) : undefined;
+      const blockedByUniqueness = !!monster?.isUnique && !wizard;
+      const blockedByNoCorpse = !!mntmp && (!monster || !monster.hasCorpse);
+      const noneSpecified = !mntmp;
+      if (noneSpecified || blockedByUniqueness || blockedByNoCorpse) {
+        const fallback = rng.pick(CORPSE_ELIGIBLE_MONSTERS);
+        notes.push(
+          noneSpecified
+            ? `No monster specified -- mksobj() always rolls a real random corpse-eligible monster at creation ("${fallback.name}" here), it isn't left blank.`
+            : !monster
+              ? `"${mntmp}" isn't a recognized monster -- substitutes a random corpse ("${fallback.name}" here).`
+              : blockedByUniqueness
+                ? `${mntmp} is unique -- outside wizard mode the wish can't target it, so it substitutes a random corpse ("${fallback.name}" here) instead.`
+                : `${mntmp} leaves no corpse -- substitutes a random corpse ("${fallback.name}" here) instead.`
+        );
+        mntmp = fallback.name;
       }
       break;
     }
     case 'FIGURINE': {
-      if (mntmp) {
-        const monster = MONSTERS_BY_NAME.get(mntmp.toLowerCase());
-        if (monster && (monster.isUnique || monster.isHuman) && mntmp.toLowerCase() !== 'mail daemon') {
-          notes.push(`Figurines of unique monsters or humans (other than the mail daemon) are denied -- substitutes a random figurine.`);
-          mntmp = null;
-        }
+      const monster = mntmp ? MONSTERS_BY_NAME.get(mntmp.toLowerCase()) : undefined;
+      const isMailDaemon = mntmp?.toLowerCase() === 'mail daemon';
+      const blockedByUniqueness = !!monster?.isUnique && !isMailDaemon;
+      const blockedByHuman = !!monster?.isHuman && !isMailDaemon;
+      const noneSpecified = !mntmp;
+      if (noneSpecified || blockedByUniqueness || blockedByHuman) {
+        const fallback = rng.pick(FIGURINE_ELIGIBLE_MONSTERS);
+        notes.push(
+          noneSpecified
+            ? `No monster specified -- mksobj() always rolls a real random monster at creation ("${fallback.name}" here), it isn't left blank.`
+            : blockedByUniqueness
+              ? `${mntmp} is unique -- figurines of unique monsters are always denied, even in wizard mode -- substitutes a random figurine ("${fallback.name}" here).`
+              : `Figurines of humans (other than the mail daemon) are denied -- substitutes a random figurine ("${fallback.name}" here).`
+        );
+        mntmp = fallback.name;
       }
       break;
     }

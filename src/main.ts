@@ -2,11 +2,12 @@ import { runWishPipeline } from './parser/pipeline';
 import { readUrlState, writeUrlState, shareUrl, type AppState } from './urlState';
 import { renderTimeline } from './ui/renderTimeline';
 import { renderResultPanel } from './ui/renderResult';
-import { renderExamples } from './ui/renderExamples';
+import { renderExamples, renderStarterStrip } from './ui/renderExamples';
 import { renderScopeNotice } from './ui/renderScopeNotice';
 import { escapeHtml, qs } from './ui/domHelpers';
 import { NETHACK_VERSION, NETHACK_TREE_URL } from './parser/sourceRefs';
 import { ROLES } from './parser/types';
+import { COMMON_WISHES_BY_TEXT } from './data/commonWishes';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
@@ -40,6 +41,7 @@ app.innerHTML = `
       </label>
       <button id="copy-link" type="button" title="Copy a shareable link to this exact parse">Copy link</button>
     </div>
+    ${renderStarterStrip()}
     <div class="examples-header">
       <button id="toggle-examples" type="button" aria-expanded="true">Hide examples</button>
     </div>
@@ -49,6 +51,7 @@ app.innerHTML = `
   <section class="output-section">
     <div class="results-toolbar">
       <button id="reroll" type="button" title="Pin a new random seed and re-run this exact wish text -- only changes anything if the result has an RNG component.">🎲 Reroll</button>
+      <div id="matched-example-note" class="matched-note" hidden></div>
     </div>
     <div id="results" class="results"></div>
     <div class="timeline-wrap">
@@ -82,6 +85,7 @@ const resultsEl = qs<HTMLDivElement>(app, '#results');
 const timelineEl = qs<HTMLDivElement>(app, '#timeline');
 const examplesEl = qs<HTMLDivElement>(app, '#examples');
 const toggleExamplesBtn = qs<HTMLButtonElement>(app, '#toggle-examples');
+const matchedNoteEl = qs<HTMLDivElement>(app, '#matched-example-note');
 
 let state: AppState = readUrlState();
 input.value = state.wish;
@@ -92,18 +96,29 @@ roleInput.value = state.role ?? '';
 const EXAMPLES_HIDDEN_KEY = 'nethack-wish-parser:examplesHidden';
 function setExamplesHidden(hidden: boolean) {
   examplesEl.hidden = hidden;
-  toggleExamplesBtn.textContent = hidden ? 'Show examples' : 'Hide examples';
+  toggleExamplesBtn.textContent = hidden ? 'Show more examples' : 'Hide examples';
   toggleExamplesBtn.setAttribute('aria-expanded', String(!hidden));
   localStorage.setItem(EXAMPLES_HIDDEN_KEY, String(hidden));
 }
 setExamplesHidden(localStorage.getItem(EXAMPLES_HIDDEN_KEY) === 'true');
 
+function renderMatchedNote() {
+  const matched = COMMON_WISHES_BY_TEXT.get(state.wish.trim().toLowerCase());
+  matchedNoteEl.hidden = !matched;
+  matchedNoteEl.innerHTML = matched
+    ? `📌 Curated example (<em>${escapeHtml(matched.group)}</em>): ${escapeHtml(matched.label)}`
+    : '';
+}
+
 function render() {
   if (!state.wish.trim()) {
     resultsEl.innerHTML = '<p class="empty">Type a wish, or click an example below, to see the parse.</p>';
     timelineEl.innerHTML = '';
+    matchedNoteEl.hidden = true;
     return;
   }
+
+  renderMatchedNote();
 
   const result = runWishPipeline(state.wish, state.seed, state.luck, state.role);
   // A different seed for the same wish text/luck/role: if either xname
