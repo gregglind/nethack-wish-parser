@@ -19,7 +19,7 @@ const app = document.querySelector<HTMLDivElement>("#app")!;
 
 app.innerHTML = `
   <header class="site-header">
-    <h1>🧞 NetHack Wish Parser (${escapeHtml(NETHACK_VERSION)})</h1>
+    <h1> Nethack Wish Parser (${escapeHtml(NETHACK_VERSION)})</h1>
     <p class="tagline">
       Type a <code>#wish</code> string and see exactly how NetHack's real parser
       (<code>readobjnam()</code> in <code>src/objnam.c</code>) would walk through it,
@@ -238,9 +238,18 @@ app.querySelectorAll<HTMLButtonElement>(".chip").forEach((chip) => {
   chip.addEventListener("click", () => {
     const wish = chip.dataset.wish ?? "";
     input.value = wish;
-    const luckOverride = chip.dataset.luck !== undefined ? Number(chip.dataset.luck) : undefined;
+    const luckOverride =
+      chip.dataset.luck !== undefined ? Number(chip.dataset.luck) : undefined;
     if (luckOverride !== undefined) luckInput.value = String(luckOverride);
-    state = { ...state, wish, seed: undefined, luck: luckOverride ?? state.luck };
+    const roleOverride = chip.dataset.role as AppState["role"] | undefined;
+    if (roleOverride !== undefined) roleInput.value = roleOverride ?? "";
+    state = {
+      ...state,
+      wish,
+      seed: undefined,
+      luck: luckOverride ?? state.luck,
+      role: roleOverride ?? state.role,
+    };
     sync();
   });
 });

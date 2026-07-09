@@ -53,6 +53,7 @@ const MARKER_LEGEND: { icon: string; label: string }[] = [
   { icon: '🧙', label: 'Wizard only -- the wizard-vs-normal split is the whole point of this example' },
   { icon: '🎲', label: 'Random -- this result genuinely varies by RNG roll; Reroll can change it' },
   { icon: '🍀N', label: 'Clicking this chip also sets the Luck input to N' },
+  { icon: '🎭Role', label: "Clicking this chip also sets the Role selector -- this is that role's own quest artifact" },
 ];
 
 export function renderMechanicNotes(): string {

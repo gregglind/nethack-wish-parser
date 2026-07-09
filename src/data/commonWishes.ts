@@ -1,3 +1,5 @@
+import type { Role } from '../parser/types';
+
 export interface CommonWish {
   text: string;
   label: string;
@@ -10,6 +12,8 @@ export interface CommonWish {
   random?: boolean;
   /** Clicking this chip also sets the Luck input to this value -- the example only makes its point at this specific Luck. Rendered as a "🍀N" badge on its chip. */
   luck?: number;
+  /** Clicking this chip also sets the Role selector to this value -- this is that role's own quest artifact, always denied outside wizard mode at this Role. Rendered as a "🎭Role" badge on its chip. */
+  role?: Role;
 }
 
 /**
@@ -96,23 +100,27 @@ export const COMMON_WISHES: CommonWish[] = [
   // Quest artifacts
   {
     text: "blessed rustproof Eye of the Aethiopica",
-    label: "Neutral: magic resistance + energy regen + telepathy",
+    label: "Neutral: magic resistance + energy regen + telepathy. The Wizard's own quest artifact -- always denied outside wizard mode at that role",
     group: "Quest artifacts",
+    role: "Wizard",
   },
   {
     text: "blessed fireproof Platinum Yendorian Express Card",
-    label: "Neutral: magic resistance + telepathy + charging",
+    label: "Neutral: magic resistance + telepathy + charging. The Tourist's own quest artifact -- always denied outside wizard mode at that role",
     group: "Quest artifacts",
+    role: "Tourist",
   },
   {
     text: "blessed Eyes of the Overworld",
-    label: "Neutral: astral vision + magic resistance",
+    label: "Neutral: astral vision + magic resistance. The Monk's own quest artifact -- always denied outside wizard mode at that role",
     group: "Quest artifacts",
+    role: "Monk",
   },
   {
     text: "blessed Orb of Fate",
-    label: "Neutral: half physical/spell damage",
+    label: "Neutral: half physical/spell damage. The Valkyrie's own quest artifact -- always denied outside wizard mode at that role",
     group: "Quest artifacts",
+    role: "Valkyrie",
   },
 
   // Wand of wishing strategy

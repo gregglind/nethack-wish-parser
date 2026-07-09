@@ -255,6 +255,12 @@ code, .result-xname, input[type='text'] {
 .chip.chip--wizard {
   border-color: var(--accent);
 }
+.chip-marker--role {
+  color: var(--yellow);
+}
+.chip.chip--role {
+  border-color: var(--yellow);
+}
 .chip-marker--random {
   color: var(--purple);
 }
