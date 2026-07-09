@@ -322,6 +322,13 @@ export const COMMON_WISHES: CommonWish[] = [
     group: "Eggs",
   },
   {
+    text: "10 giant ant eggs",
+    label:
+      '"giant ant" is recognized and lays eggs -- works as named, but normal wishes will only return one.',
+    group: "Eggs",
+    wizard: true,
+  },
+  {
     text: "mind flayer egg",
     label:
       "Recognized monster, but not oviparous -- substitutes a generic egg instead of failing",

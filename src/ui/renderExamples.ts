@@ -75,8 +75,7 @@ const GROUP_DESCRIPTIONS: Record<string, string> = {
     "Negative Luck silently denies qualifiers in normal play (forces cursed, flips high enchantment negative, denies erodeproofing/poison) -- wizard mode is immune to all of it. Clicking these chips also sets the Luck input.",
   "Everyday items":
     "Common, unremarkable wand-of-wishing picks for routine play.",
-  "Eggs":
-    "Egg wishes only work when the monster is both recognized and actually oviparous -- an unrecognized name fails outright rather than falling back to something generic, unlike corpses/tins/figurines/statues.",
+  Eggs: "Egg wishes only work when the monster is both recognized and actually oviparous -- an unrecognized name fails outright rather than falling back to something generic, unlike corpses/tins/figurines/statues.  If the monster is not oviparous, a generic egg will be substituted.",
 };
 
 export function renderExamples(): string {
