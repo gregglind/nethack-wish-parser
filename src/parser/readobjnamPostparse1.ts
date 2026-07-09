@@ -121,6 +121,42 @@ export function readobjnamPostparse1(input: ParseState): Postparse1Result {
     }
   }
 
+  // -- Amulet of Yendor: real vs fake is a deterministic special case, not an
+  // ambiguous name/description fuzzy match. "Amulet of Yendor" is both the
+  // real amulet's actualName and the fake's unidentified description, but the
+  // real game special-cases the text match itself: not specifying "fake" (or
+  // "cheap"/"plastic"/"imitation") always means the real one here. Whether it
+  // survives to the final object is a wizard-mode question, resolved later by
+  // applyModeSubstitution.
+  if (!s.otyp) {
+    const lower = text.toLowerCase();
+    const idx = lower.indexOf('amulet of yendor');
+    if (idx !== -1 && (idx === 0 || /\s/.test(text[idx - 1]))) {
+      const before = text;
+      const prefix = lower.slice(0, idx);
+      const fake = s.fake || ['cheap ', 'plastic ', 'imitation '].some((w) => prefix.endsWith(w));
+      const real = !fake;
+      const otyp = real ? 'AMULET_OF_YENDOR' : 'FAKE_AMULET_OF_YENDOR';
+      text = '';
+      s = { ...s, otyp, oclass: 'amulet', real, fake, input: text };
+      pushStep(
+        steps,
+        'postparse1:amulet-of-yendor',
+        'Amulet of Yendor: real vs fake',
+        before,
+        real ? 'Amulet of Yendor (real)' : 'cheap plastic imitation of the Amulet of Yendor',
+        { otyp, oclass: 'amulet', real, fake },
+        SOURCE_REFS.postparse1AmuletOfYendor,
+        [
+          real
+            ? 'Not specifying "fake"/"cheap"/"plastic"/"imitation" defaults to the real Amulet of Yendor -- checked deterministically, before the generic ambiguous-name fuzzy lookup ever runs.'
+            : '"fake"/"cheap"/"plastic"/"imitation" forces the worthless imitation.',
+        ]
+      );
+      return { state: s, steps, goldShortCircuit: null, rejected: null };
+    }
+  }
+
   // -- pair/set of --
   if (!s.otyp) {
     const m = /^(pair|pairs|set|sets) of (.+)$/i.exec(text);
@@ -246,7 +282,7 @@ export function readobjnamPostparse1(input: ParseState): Postparse1Result {
   // -- paperback --
   if (!s.otyp) {
     if (/^paperback spellbook$/i.test(text.trim())) {
-      return { state: s, steps, goldShortCircuit: null, rejected: '"paperback spellbook" is not a real item -- paperback books and spellbooks are deliberately incompatible.' };
+      return { state: s, steps, goldShortCircuit: null, rejected: 'Nothing fitting that description exists in the game.' };
     }
     if (/^paperback( book)?$/i.test(text.trim())) {
       const before = text;
@@ -276,12 +312,28 @@ export function readobjnamPostparse1(input: ParseState): Postparse1Result {
   }
 
   // -- single-char class symbol --
+  // objnam.c's def_char_to_objclass() also recognizes '0' (BALL_CLASS) and
+  // '_' (CHAIN_CLASS) -- both real classes with exactly one wishable member
+  // (prob 1000, i.e. the only choice), so they resolve straight to that otyp
+  // rather than through the generic oclass-then-random-within-class path.
+  // '.' (VENOM_CLASS) is intentionally out of scope (see objects.ts).
+  const SINGLE_CHAR_OTYP: Record<string, string> = {
+    '0': 'HEAVY_IRON_BALL',
+    '_': 'IRON_CHAIN',
+  };
   const CLASS_SYMBOLS: Record<string, ParseState['oclass']> = {
     '/': 'wand', '=': 'ring', '!': 'potion', '?': 'scroll', '*': 'gem',
     '"': 'amulet', '+': 'spellbook', ')': 'weapon', '[': 'armor', '(': 'tool',
-    '%': 'food', '$': 'coin',
+    '%': 'food', '$': 'coin', '`': 'rock',
   };
-  if (!s.otyp && !s.oclass && text.trim().length === 1 && CLASS_SYMBOLS[text.trim()]) {
+  if (!s.otyp && !s.oclass && text.trim().length === 1 && SINGLE_CHAR_OTYP[text.trim()]) {
+    const before = text;
+    const otyp = SINGLE_CHAR_OTYP[text.trim()]!;
+    s = { ...s, otyp, oclass: 'tool' };
+    pushStep(steps, 'postparse1:class-symbol-ball-chain', 'Single-character class symbol (ball/chain)', before, text, { otyp, oclass: 'tool' }, SOURCE_REFS.postparse1ClassSymbol, [
+      `"${before}" is the display symbol for a real object class with exactly one wishable member.`,
+    ]);
+  } else if (!s.otyp && !s.oclass && text.trim().length === 1 && CLASS_SYMBOLS[text.trim()]) {
     const before = text;
     const oclass = CLASS_SYMBOLS[text.trim()]!;
     s = { ...s, oclass };

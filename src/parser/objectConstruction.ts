@@ -81,13 +81,12 @@ export function applyModeSubstitution(state: ParseState, mode: 'wizard' | 'norma
   if (mode === 'wizard') return { otyp: state.otyp, rejected: null, note: null };
 
   const def = byOtyp(state.otyp);
-  if (def?.noWish) {
-    return {
-      otyp: null,
-      rejected: `"${def.actualName}" cannot be wished for outside wizard mode.`,
-      note: 'oc_nowish types are rejected outright in normal play.',
-    };
-  }
+  // Substitution table first: real readobjnam() has dedicated switch cases for
+  // these types that substitute and `break`, never falling through to the
+  // oc_nowish check below (which only ever catches types with no dedicated
+  // case -- in the current object table that's none, oc_nowish is unset on
+  // every entry, but the check is kept for parity with the real switch's
+  // `default` branch).
   const sub = NO_WISH_UNLESS_WIZARD[state.otyp];
   if (sub) {
     const subDef = byOtyp(sub)!;
@@ -95,6 +94,13 @@ export function applyModeSubstitution(state: ParseState, mode: 'wizard' | 'norma
       otyp: sub,
       rejected: null,
       note: `Non-wizard play silently substitutes "${subDef.actualName}" for "${def!.actualName}".`,
+    };
+  }
+  if (def?.noWish) {
+    return {
+      otyp: null,
+      rejected: `"${def.actualName}" cannot be wished for outside wizard mode.`,
+      note: 'oc_nowish types are rejected outright in normal play.',
     };
   }
   return { otyp: state.otyp, rejected: null, note: null };

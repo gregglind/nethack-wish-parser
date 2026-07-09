@@ -2,7 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { COMMON_WISHES } from '../../src/data/commonWishes';
 import { runWishPipeline } from '../../src/parser/pipeline';
 
-const EXPECTED_FAILURES = new Set(['broken glass', 'paperback spellbook']);
+const EXPECTED_FAILURES = new Set([
+  'broken glass',
+  'paperback spellbook',
+  'blessed greased +2 gray scale mail',
+  'gray dragon scale mail of gray dragon scale mail',
+  'firetrap',
+  'eyes',
+]);
 
 describe('golden: every curated common wish', () => {
   for (const wish of COMMON_WISHES) {

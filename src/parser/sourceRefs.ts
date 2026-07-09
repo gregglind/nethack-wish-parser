@@ -65,6 +65,7 @@ export const SOURCE_REFS = {
   postparse1Called: ref('src/objnam.c', 4258, 4273, 'readobjnam_postparse1'),
   postparse1Labeled: ref('src/objnam.c', 4274, 4277, 'readobjnam_postparse1'),
   postparse1Spinach: ref('src/objnam.c', 4278, 4311, 'readobjnam_postparse1'),
+  postparse1AmuletOfYendor: ref('src/objnam.c', 4311, 4338, 'readobjnam_postparse1'),
   postparse1Glob: ref('src/objnam.c', 4312, 4447, 'readobjnam_postparse1'),
   postparse1Singular: ref('src/objnam.c', 4448, 4488, 'readobjnam_postparse1'),
   postparse1DragonScales: ref('src/objnam.c', 4483, 4488, 'readobjnam_postparse1'),

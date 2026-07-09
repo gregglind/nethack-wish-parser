@@ -77,7 +77,7 @@ export function readobjnamPostparse2(input: ParseState, rng: Rng): { state: Pars
     if (glass) {
       const before = text;
       if (s.broken || /\bbroken\b/i.test(text)) {
-        return { state: s, steps, rejected: '"broken glass" is not a real item -- glass is only wishable as worthless glass gems.' };
+        return { state: s, steps, rejected: 'Nothing fitting that description exists in the game.' };
       }
       const color = (glass[2] || '').trim().toLowerCase();
       if (!color) {

@@ -153,12 +153,22 @@ export function runWishPipeline(rawInput: string, seed?: number, luck = 0): Wish
     return buildTerrainResult(rawInput, steps, state.terrainMatch);
   }
 
+  // No type, no class, and leftover text that never matched anything --
+  // mirrors readobjnam()'s final `if (!d.oclass) return NULL;`. The random
+  // any-class fallback (objnam.c's `any:` label) only fires for a genuinely
+  // empty string (nothing left after qualifiers were stripped); non-empty
+  // unmatched text is a failed wish ("Nothing fitting that description
+  // exists in the game."), not a consolation random item.
+  if (!state.otyp && !state.oclass && state.input.trim().length > 0) {
+    return buildFailure(rawInput, steps, 'Nothing fitting that description exists in the game.');
+  }
+
   const construction = objectConstruction(state, lookupRng);
   steps.push(construction.step);
   state = construction.state;
 
   if (!state.otyp && !state.oclass) {
-    return buildFailure(rawInput, steps, 'Nothing fitting that description exists.');
+    return buildFailure(rawInput, steps, 'Nothing fitting that description exists in the game.');
   }
 
   const baseBuc: Buc = rollBaseBuc(lookupRng);

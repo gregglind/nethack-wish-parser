@@ -1,0 +1,194 @@
+# Wish-parsing oddities
+
+Notes on real NetHack `#wish` behaviors that are surprising, inconsistent,
+or easy to get wrong when reimplementing `readobjnam()`. Each entry was
+confirmed against the vendored NetHack 5.0.0 source in `NetHack/` (commit
+`16ff59115315917b93185d026aeefea06db9b0f4`, see `src/parser/sourceRefs.ts`)
+and is reflected in this tool's behavior.
+
+## "amulet of yendor" is deterministic; "amulets of yendor" (plural) is a coin flip
+
+`objnam.c`'s `readobjnam_postparse1()` has a dedicated special case
+(~4311-4338) that does a literal substring search for the exact text
+`"Amulet of Yendor"`. If found, it sets the type directly:
+
+```c
+d->real = !d->fake;
+d->typ = d->real ? AMULET_OF_YENDOR : FAKE_AMULET_OF_YENDOR;
+```
+
+So plain "amulet of yendor" (no qualifier) always means the *real* amulet
+here — not an ambiguous name/description match. Whether it survives to the
+final object is a wizard-mode question, resolved later in the main
+`readobjnam()` body (~5030-5035):
+
+```c
+case AMULET_OF_YENDOR:
+    d.typ = FAKE_AMULET_OF_YENDOR;   /* only reached if (!wizard) */
+    break;
+```
+
+**But this special case requires an exact substring match.** "amulet**s** of
+yendor" (grammatically-correct plural) does *not* contain the substring
+"Amulet of Yendor" (the extra "s" breaks it), so the special case is skipped
+entirely. Singularization (`makesingular()`) does turn "amulets" into
+"amulet" later in the very same function — but only *after* the special
+case has already been passed over; there's no loop-back. So the plural form
+falls through to the generic fuzzy matcher (`rnd_otyp_by_namedesc()` /
+`wishymatch()`), which finds *both* the real amulet (matches by name) and
+the fake one (matches by description) and picks between them with equal
+weight (`xtra_prob` bumps both 0-probability items to weight 1) — a genuine
+50/50, **unaffected by wizard mode**.
+
+Net effect: `wish for "2 amulet of yendor"` (singular) deterministically
+gives the real amulet in wizard mode / the fake in normal play. `wish for
+"2 amulets of yendor"` (plural) is a coin flip in *both* modes. This is real
+game behavior, not a parser bug — implemented in
+`src/parser/readobjnamPostparse1.ts` (the deterministic singular check) vs.
+`src/parser/readobjnamPostparse3.ts` (the ambiguous fuzzy fallback that
+plural text lands in).
+
+## Non-wizard substitution vs. hard rejection are different code paths — don't conflate them
+
+`readobjnam()`'s final wizard-mode gate (~5030-5053) is a `switch` with
+dedicated cases for five types, each of which *substitutes* a mundane
+item and `break`s:
+
+```c
+switch (d.typ) {
+case AMULET_OF_YENDOR:        d.typ = FAKE_AMULET_OF_YENDOR; break;
+case CANDELABRUM_OF_INVOCATION: d.typ = rnd_class(TALLOW_CANDLE, WAX_CANDLE); break;
+case BELL_OF_OPENING:         d.typ = BELL; break;
+case SPE_BOOK_OF_THE_DEAD:    d.typ = SPE_BLANK_PAPER; break;
+case MAGIC_LAMP:              d.typ = OIL_LAMP; break;
+default:
+    if (objects[d.typ].oc_nowish)
+        return (struct obj *) 0;   /* true rejection -- only for the default case */
+    break;
+}
+```
+
+The `oc_nowish` hard-rejection only fires for types with **no** dedicated
+case above — and in the current object table, `oc_nowish` is never actually
+set on anything (`grep -rn oc_nowish NetHack/include NetHack/src` shows the
+bit exists but no object in `objects.h` sets it; it's vestigial). This
+tool's `applyModeSubstitution()` originally checked its own `noWish` flag
+*before* the substitution table, which meant any object marked both
+`noWish: true` and present in the substitution map (Amulet of Yendor,
+Candelabrum, Bell of Opening, Book of the Dead) got the wrong outright
+"cannot be wished for outside wizard mode" rejection in normal play instead
+of the correct silent substitute. Fixed by checking the substitution table
+first (`src/parser/objectConstruction.ts`).
+
+## Unmatched non-empty text fails; the random-fallback only fires for genuinely empty text
+
+`readobjnam()`'s `any:` label (a uniformly random class, then a
+rarity-weighted random type within it) is reached in exactly two ways:
+
+1. `readobjnam(NULL, ...)` — called with no string at all (used internally
+   after `MAXWISHTRY` failed retries, or for wizkit filling).
+2. `readobjnam_preparse()` strips known qualifier prefixes down to an empty
+   remaining string (`goto any` when nothing is left to match against).
+
+Every *other* unmatched case — text that doesn't parse as a null string but
+also doesn't match any class, type, name, or description — falls through
+to `if (!d.oclass) return (struct obj *) 0;`, which `makewish()` in
+`zap.c` turns into: `pline("Nothing fitting that description exists in the
+game."); ... goto retry;` (re-prompting the player, not handing them a
+consolation random item).
+
+This tool previously conflated the two paths (`pickedRandomClass = !s.otyp
+&& !s.oclass`, regardless of whether there was unconsumed text), so any
+garbled/typo'd wish silently resolved to *some* random object instead of
+failing. Fixed in `src/parser/pipeline.ts` by gating the random fallback on
+`preparseResult.exhausted` (leftover text is empty) and returning the
+generic failure message otherwise. This also corrected several
+previously-mislabeled fixture entries — `firetrap`, `eyes` (bare), `0`
+(*before* the ball-symbol fix below was found), and two "drop a word and
+get a random item" broken-wish examples — which had all been documented as
+"resolves to something random" when they should fail outright.
+
+## "broken glass" and "paperback spellbook" have no special error text
+
+Both are dedicated rejections in `objnam.c` (`d->otmp = (struct obj *) 0;
+return 3;` at ~4718-4723 and ~4538-4541 respectively) that return `NULL`
+through the exact same path as any other unmatched wish. There is no
+type-specific error message anywhere in the real game — `makewish()` always
+prints the one generic string, "Nothing fitting that description exists in
+the game." This tool originally invented explanatory custom messages for
+these two cases; fixed to emit the real generic message in
+`src/parser/readobjnamPostparse1.ts` / `readobjnamPostparse2.ts`.
+
+## "holy"/"unholy" collide based on adjacency to "water", not on which word appears first
+
+The blessed/cursed adjective-prefix loop in `readobjnam_preparse()` only
+strips qualifiers from the *front* of the string and stops at the first
+non-qualifier word — so "potion of holy unholy water" never reaches
+"holy"/"unholy" there (it stops at "potion"). Instead, a dedicated suffix
+check further down in `readobjnam_postparse1()` (~4517-4530) inspects only
+the two characters *immediately preceding* "holy water":
+
+```c
+if (!BSTRNCMPI(d->bp, d->p - 10 - 2, "un", 2))
+    d->iscursed = 1, ...;   /* unholy water */
+else
+    d->blessed = 1, ...;    /* holy water */
+```
+
+So in "potion of **holy unholy** water", "un" is immediately before "holy
+water" → cursed wins. Swap the order to "unholy holy water" and blessed
+would win instead — it's positional, not "cursed always wins." (Also: the
+resulting potion doesn't display as "holy"/"unholy" water, since wishing
+doesn't set `bknown` — BUC stays hidden until quaffed/identified/blessed by
+a priest, same as in real NetHack.) Already correctly modeled in
+`src/parser/readobjnamPostparse1.ts`.
+
+## "0" is the display symbol for iron balls — not just a quantity edge case
+
+`readobjnam_preparse()` explicitly excludes a literal `"0"` from being
+consumed as a quantity (`digit(*d->bp) && strcmp(d->bp, "0")`), so it
+survives as object-name text. But a separate, later check
+(`readobjnam_postparse1()`, ~4577-4582) recognizes any single character that
+matches a real object-class display symbol:
+
+```c
+if (strlen(d->bp) == 1 && (i = def_char_to_objclass(*d->bp)) < MAXOCLASSES
+    && i > ILLOBJ_CLASS && (i != VENOM_CLASS || wizard)) {
+    d->oclass = i;
+    return 4; /* goto any -- random object of this class */
+}
+```
+
+`'0'` is `BALL_CLASS`'s symbol (`defsym.h`), and `'_'` is `CHAIN_CLASS`'s.
+Both classes have exactly one wishable member with `oc_prob 1000` (the only
+choice), so the "random pick within class" step is deterministic: `'0'` →
+heavy iron ball, `'_'` → iron chain. Neither is wizard-gated — only `'.'`
+(`VENOM_CLASS`) has the `|| wizard` escape hatch, and this tool
+intentionally has no venom objects modeled (see the scope note in
+`src/data/objects.ts`). `` ` `` (`ROCK_CLASS`, boulder/statue) was also
+missing from this tool's single-character symbol table. All three are now
+handled in `src/parser/readobjnamPostparse1.ts`.
+
+## The tool's BUC roll is class-agnostic; the real game's isn't
+
+When no `blessed`/`cursed`/`uncursed` qualifier is given (and no negative
+enchantment sign), `readobjnam()` never touches beatitude at all — the
+object keeps whatever `mksobj()` rolled at creation time via
+`blessorcurse(otmp, chance)`, and `chance` varies a lot by class:
+
+| class / case | `blessorcurse` chance | odds of blessed / cursed / uncursed |
+|---|---|---|
+| amulets (except 3 bad ones) | 10 | 5% / 5% / 90% |
+| potions, scrolls | 4 | 12.5% / 12.5% / 75% |
+| spellbooks | 17 | ~2.9% / ~2.9% / ~94% |
+| crystal ball, can of grease | 2 | 25% / 25% / 50% |
+| most weapons/armor/rings/wands (generic default) | 10 | 5% / 5% / 90% |
+
+This tool's `rollBaseBuc()` (`src/parser/bucAssignment.ts`) uses one flat
+`rn2(6)` for every object in the game — 16.7% blessed / 16.7% cursed /
+66.7% uncursed — regardless of class. So "cursed"/"blessed" results aren't
+*wrong*, but they show up roughly 3x more often than the real game would
+produce for a plain "amulet of yendor" (or most other classes). Flagged but
+**not yet fixed** — would require pulling the real per-class chance
+parameter into the object table, which touches BUC odds for every item in
+the tool, not just this one case.
