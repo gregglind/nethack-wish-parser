@@ -22,7 +22,9 @@ app.innerHTML = `
   <header class="site-header">
     <h1> Nethack Wish Commands Explained (${escapeHtml(NETHACK_VERSION)})</h1>
     <p class="tagline">
-      Type a <code>#wish</code> string and see exactly how NetHack's real parser
+      Type a <code>#wish</code>
+      <a href="https://nethackwiki.com/wiki/Wish" target="_blank" rel="noopener noreferrer" title="NetHackWiki: Wish" class="wiki-icon">📖</a>
+      string and see exactly how NetHack's real parser
       (<code>readobjnam()</code> in <code>src/objnam.c</code>) would walk through it,
       step by step, with links back to the source.
     </p>
@@ -82,6 +84,8 @@ app.innerHTML = `
       <a href="https://github.com/gregglind/nethack-wish-parser" target="_blank" rel="noopener noreferrer">Source on GitHub</a>
       &middot;
       <a href="https://github.com/gregglind/nethack-wish-parser/issues" target="_blank" rel="noopener noreferrer">Report a bug</a>
+      &middot;
+      <a href="https://nethackwiki.com/wiki/Wish" target="_blank" rel="noopener noreferrer">NetHackWiki: Wish</a>
     </p>
   </footer>
 `;

@@ -80,6 +80,15 @@ code, .result-xname, input[type='text'] {
   border: 1px solid var(--border);
 }
 
+.wiki-icon {
+  text-decoration: none;
+  opacity: 0.7;
+}
+
+.wiki-icon:hover {
+  opacity: 1;
+}
+
 .input-row {
   display: flex;
   gap: 0.5rem;
