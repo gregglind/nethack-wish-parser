@@ -171,6 +171,7 @@ export const COMMON_WISHES: CommonWish[] = [
     label:
       '"holy"/"unholy" collide -- whichever is adjacent to "water" wins, not whichever came first',
     group: "Qualifier showcase",
+    broken: true,
   },
   {
     text: "+2 +3 dagger",
@@ -325,6 +326,7 @@ export const COMMON_WISHES: CommonWish[] = [
     label:
       "Recognized monster, but not oviparous -- substitutes a generic egg instead of failing",
     group: "Eggs",
+    broken: true,
   },
   {
     text: "baby blue dragon egg",
@@ -462,4 +464,6 @@ export const STARTER_WISHES: string[] = [
   "potion of holy unholy water", // qualifier collision / precedence rule
   "blessed fireproof +3 long sword", // luck
   "blessed fireproof Platinum Yendorian Express Card", // denied as Tourist
+  "ant egg", //
+  "mind flayer egg",
 ];
