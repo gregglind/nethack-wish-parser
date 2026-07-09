@@ -317,7 +317,7 @@ function resolveMode(
   luck: number,
   currentRole: Role | null
 ): ModeFields {
-  const sub = applyModeSubstitution(state, mode);
+  const sub = applyModeSubstitution(state, mode, rng);
   let workingState = { ...state, otyp: sub.otyp };
   let rejected: string | null = sub.rejected;
 

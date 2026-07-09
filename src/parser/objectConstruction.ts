@@ -69,14 +69,16 @@ export interface ModeSubstitutionResult {
 
 const NO_WISH_UNLESS_WIZARD: Record<string, string> = {
   AMULET_OF_YENDOR: 'FAKE_AMULET_OF_YENDOR',
-  CANDELABRUM_OF_INVOCATION: 'WAX_CANDLE',
   BELL_OF_OPENING: 'BELL',
   SPE_BOOK_OF_THE_DEAD: 'SPE_BLANK_PAPER',
   MAGIC_LAMP: 'OIL_LAMP',
 };
 
+/** objnam.c:5037 -- rnd_class(TALLOW_CANDLE, WAX_CANDLE), not a fixed candle. */
+const CANDLE_POOL = ['TALLOW_CANDLE', 'WAX_CANDLE'] as const;
+
 /** Applies the non-wizard item substitutions/rejections. Wizard mode passes through untouched. */
-export function applyModeSubstitution(state: ParseState, mode: 'wizard' | 'normal'): ModeSubstitutionResult {
+export function applyModeSubstitution(state: ParseState, mode: 'wizard' | 'normal', rng: Rng): ModeSubstitutionResult {
   if (!state.otyp) return { otyp: state.otyp, rejected: null, note: null };
   if (mode === 'wizard') return { otyp: state.otyp, rejected: null, note: null };
 
@@ -87,6 +89,15 @@ export function applyModeSubstitution(state: ParseState, mode: 'wizard' | 'norma
   // case -- in the current object table that's none, oc_nowish is unset on
   // every entry, but the check is kept for parity with the real switch's
   // `default` branch).
+  if (state.otyp === 'CANDELABRUM_OF_INVOCATION') {
+    const candleDefs = CANDLE_POOL.map((otyp) => byOtyp(otyp)!);
+    const chosen = rng.weightedPick(candleDefs, (o) => Math.max(o.prob, 1));
+    return {
+      otyp: chosen.otyp,
+      rejected: null,
+      note: `Non-wizard play silently substitutes a random candle (tallow is 4x likelier than wax) for "${def!.actualName}" -- got "${chosen.actualName}" here.`,
+    };
+  }
   const sub = NO_WISH_UNLESS_WIZARD[state.otyp];
   if (sub) {
     const subDef = byOtyp(sub)!;

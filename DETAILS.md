@@ -557,3 +557,25 @@ Key subtleties, all confirmed against source and mirrored exactly:
   otherwise be an unconditional wizard grant.
 
 New "Chests" curated-examples section demonstrates all of the above.
+
+## Candelabrum of Invocation's normal-play substitute is a random candle, not always wax
+
+`objnam.c:5037`'s wizard-mode substitution table has:
+
+```c
+case CANDELABRUM_OF_INVOCATION:
+    d.typ = rnd_class(TALLOW_CANDLE, WAX_CANDLE);
+    break;
+```
+
+`rnd_class()` (`objnam.c:5432`) picks between the two weighted by their real
+rarity (`oc_prob`): tallow candle is 20, wax candle is 5, so tallow is 4x
+likelier. This tool's `NO_WISH_UNLESS_WIZARD` substitution table
+(`src/parser/objectConstruction.ts`) instead had a fixed
+`CANDELABRUM_OF_INVOCATION: 'WAX_CANDLE'` entry, so normal play always gave
+a wax candle and never a tallow one. Fixed by special-casing the
+Candelabrum ahead of the static lookup table and doing a real
+`rng.weightedPick()` over both candle types (mirroring how
+`objectConstruction()` already does weighted picks elsewhere), threading
+`rng` into `applyModeSubstitution()`. Wizard mode is unaffected -- it
+still always returns the real Candelabrum.

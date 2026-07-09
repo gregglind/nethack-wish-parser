@@ -442,9 +442,10 @@ export const COMMON_WISHES: CommonWish[] = [
   {
     text: "Candelabrum of Invocation",
     label:
-      "The real thing only in wizard mode -- normal play silently substitutes a candle",
+      "The real thing only in wizard mode -- normal play silently substitutes a random candle (tallow is 4x likelier than wax)",
     group: "Wizard only",
     wizard: true,
+    random: true,
   },
   {
     text: "Bell of Opening",
