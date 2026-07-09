@@ -6,6 +6,7 @@ import { renderExamples } from './ui/renderExamples';
 import { renderScopeNotice } from './ui/renderScopeNotice';
 import { escapeHtml, qs } from './ui/domHelpers';
 import { NETHACK_VERSION, NETHACK_TREE_URL } from './parser/sourceRefs';
+import { ROLES } from './parser/types';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
@@ -29,6 +30,13 @@ app.innerHTML = `
       <label class="luck-input" title="Luck can't be derived from wish text -- set it manually. Shifts several normal-play probabilities (BUC, enchantment sign, erosion-proofing, poison).">
         <span>Luck</span>
         <input id="luck-input" type="number" min="-13" max="13" step="1" value="10" />
+      </label>
+      <label class="role-input" title="Only affects quest artifact wishes in normal play -- your own role's quest artifact is always denied, any other role's just rolls the same generic odds as an ordinary artifact.">
+        <span>Role</span>
+        <select id="role-input">
+          <option value="">(none selected)</option>
+          ${ROLES.map((r) => `<option value="${r}">${r}</option>`).join('')}
+        </select>
       </label>
       <button id="copy-link" type="button" title="Copy a shareable link to this exact parse">Copy link</button>
     </div>
@@ -61,6 +69,7 @@ app.innerHTML = `
 const input = qs<HTMLInputElement>(app, '#wish-input');
 const wizardToggle = qs<HTMLInputElement>(app, '#wizard-toggle');
 const luckInput = qs<HTMLInputElement>(app, '#luck-input');
+const roleInput = qs<HTMLSelectElement>(app, '#role-input');
 const copyLinkBtn = qs<HTMLButtonElement>(app, '#copy-link');
 const resultsEl = qs<HTMLDivElement>(app, '#results');
 const timelineEl = qs<HTMLDivElement>(app, '#timeline');
@@ -69,6 +78,7 @@ let state: AppState = readUrlState();
 input.value = state.wish;
 wizardToggle.checked = state.wizardPrimary;
 luckInput.value = String(state.luck);
+roleInput.value = state.role ?? '';
 
 function render() {
   if (!state.wish.trim()) {
@@ -77,7 +87,7 @@ function render() {
     return;
   }
 
-  const result = runWishPipeline(state.wish, undefined, state.luck);
+  const result = runWishPipeline(state.wish, undefined, state.luck, state.role);
   const wizardPanel = renderResultPanel('Wizard mode', result.wizardObject, state.wizardPrimary);
   const normalPanel = renderResultPanel('Normal play', result.normalObject, !state.wizardPrimary);
 
@@ -107,6 +117,11 @@ wizardToggle.addEventListener('change', () => {
 luckInput.addEventListener('input', () => {
   const parsed = Math.max(-13, Math.min(13, Math.round(Number(luckInput.value) || 0)));
   state = { ...state, luck: parsed };
+  sync();
+});
+
+roleInput.addEventListener('change', () => {
+  state = { ...state, role: (roleInput.value || null) as AppState['role'] };
   sync();
 });
 

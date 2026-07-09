@@ -6,6 +6,48 @@ confirmed against the vendored NetHack 5.0.0 source in `NetHack/` (commit
 `16ff59115315917b93185d026aeefea06db9b0f4`, see `src/parser/sourceRefs.ts`)
 and is reflected in this tool's behavior.
 
+## Quest artifact wish denial is role-specific, not "all quest artifacts, always"
+
+`is_quest_artifact()` (`questpgr.c:66-70`) only returns true for *your own
+role's* quest artifact:
+
+```c
+boolean
+is_quest_artifact(struct obj *otmp)
+{
+    return (boolean) (otmp->oartifact == gu.urole.questarti);
+}
+```
+
+The wish-denial check (`objnam.c:5402-5403`) is:
+
+```c
+if ((is_quest_artifact(d.otmp)
+     || (d.otmp->oartifact && rn2(nartifact_exist()) > 1)) && !wizard) {
+    // "For a moment, you feel X in your hands, but it disappears!"
+```
+
+So wishing for *your own* role's quest artifact is unconditionally denied
+outside wizard mode -- but wishing for a *different* role's quest artifact
+isn't specially denied at all. `is_quest_artifact()` is false for it, so it
+falls through to the exact same generic roll as any ordinary artifact
+(Excalibur, Stormbringer, etc.): `rn2(nartifact_exist()) > 1`. Alignment
+plays no part in this decision at all -- that's a separate mechanic
+(`touch_artifact()` in `artifact.c`, gating *picking up* an artifact
+already in the game by both role and alignment, with a magic-damage
+penalty on mismatch -- unrelated to whether a wish is granted).
+
+This tool previously had no concept of "current role" at all and treated
+every quest artifact as always-denied outside wizard mode regardless of
+whose it was. Added a `role` field to quest `ArtifactDef` entries
+(`src/data/artifacts.ts`), a `Role` type and `ROLES` list
+(`src/parser/types.ts`), a role `<select>` in the UI persisted to
+`&role=` in the URL (`src/main.ts`, `src/urlState.ts`), and threaded
+`currentRole` through `resolveArtifactWish()` (`src/parser/artifactResolution.ts`)
+so the two cases are distinguished correctly. Default is "no role
+selected," under which every quest artifact rolls generically (none of
+them are unconditionally denied) until a role is chosen.
+
 **"Unexpected and Broken" vs. "Qualifier showcase" in the curated list:** a
 wish belongs in Unexpected and Broken if it looks reasonable but silently
 fails to deliver what was asked, with zero feedback (the wish either fails

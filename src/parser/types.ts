@@ -200,11 +200,19 @@ export interface ObjectDef {
   permapoisoned?: boolean;
 }
 
+export const ROLES = [
+  'Archeologist', 'Barbarian', 'Caveman', 'Healer', 'Knight', 'Monk',
+  'Priest', 'Ranger', 'Rogue', 'Samurai', 'Tourist', 'Valkyrie', 'Wizard',
+] as const;
+export type Role = (typeof ROLES)[number];
+
 export interface ArtifactDef {
   name: string;
   baseOtyp: string;
   alignment: 'lawful' | 'neutral' | 'chaotic' | 'unaligned';
   isQuestArtifact: boolean;
+  /** Only set for quest artifacts -- the one role whose quest artifact this is (questpgr.c's is_quest_artifact()). */
+  role?: Role;
 }
 
 export interface MonsterDef {

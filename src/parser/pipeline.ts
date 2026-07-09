@@ -1,4 +1,4 @@
-import type { ParseState, ParseStep, WishResult } from './types';
+import type { ParseState, ParseStep, WishResult, Role } from './types';
 import { SOURCE_REFS } from './sourceRefs';
 import { Rng } from './rng';
 import { makewish } from './makewish';
@@ -61,7 +61,7 @@ function combinedStep(
   };
 }
 
-export function runWishPipeline(rawInput: string, seed?: number, luck = 0): WishResult {
+export function runWishPipeline(rawInput: string, seed?: number, luck = 0, currentRole: Role | null = null): WishResult {
   const effectiveSeed = seed ?? hashSeed(rawInput);
   const clampedLuck = Math.max(-13, Math.min(13, luck));
   const lookupRng = new Rng(effectiveSeed);
@@ -174,8 +174,8 @@ export function runWishPipeline(rawInput: string, seed?: number, luck = 0): Wish
   const baseBuc: Buc = rollBaseBuc(lookupRng);
   const baseSpe = rollBaseEnchantment(state, lookupRng);
 
-  const wizardFields = resolveMode(state, 'wizard', outcomeRngWizard, baseBuc, baseSpe, clampedLuck);
-  const normalFields = resolveMode(state, 'normal', outcomeRngNormal, baseBuc, baseSpe, clampedLuck);
+  const wizardFields = resolveMode(state, 'wizard', outcomeRngWizard, baseBuc, baseSpe, clampedLuck, currentRole);
+  const normalFields = resolveMode(state, 'normal', outcomeRngNormal, baseBuc, baseSpe, clampedLuck, currentRole);
 
   // Mode substitution step (only interesting if it actually differs).
   if (wizardFields.otyp !== normalFields.otyp || wizardFields.rejectedNote || normalFields.rejectedNote) {
@@ -314,7 +314,8 @@ function resolveMode(
   rng: Rng,
   baseBuc: Buc,
   baseSpe: number,
-  luck: number
+  luck: number,
+  currentRole: Role | null
 ): ModeFields {
   const sub = applyModeSubstitution(state, mode);
   let workingState = { ...state, otyp: sub.otyp };
@@ -324,7 +325,7 @@ function resolveMode(
   if (!rejected && state.isArtifact && state.artifactName) {
     const artifact = ARTIFACTS_BY_NAME.get(state.artifactName.toLowerCase());
     if (artifact) {
-      const outcome = resolveArtifactWish(artifact, mode, rng);
+      const outcome = resolveArtifactWish(artifact, mode, rng, currentRole);
       artifactNote = outcome.note;
       if (!outcome.granted) {
         rejected = `For a moment, you feel the ${artifact.name} in your hands, but it disappears!`;

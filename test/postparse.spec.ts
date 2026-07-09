@@ -55,10 +55,15 @@ describe('postparse resolution (via full pipeline)', () => {
     expect(result.wizardObject.xname).toContain('female gnome ruler statue');
   });
 
-  it('always denies quest artifacts in normal play but grants them in wizard mode', () => {
-    const result = runWishPipeline('blessed Orb of Fate', 1);
+  it("always denies your own role's quest artifact in normal play but grants it in wizard mode", () => {
+    const result = runWishPipeline('blessed Orb of Fate', 1, 0, 'Valkyrie');
     expect(result.normalObject.xname).toContain('disappears');
     expect(result.wizardObject.xname).toContain('Orb of Fate');
+  });
+
+  it('rolls a quest artifact generically (not always denied) when it belongs to a different role', () => {
+    const result = runWishPipeline('blessed Orb of Fate', 1, 0, 'Wizard');
+    expect(result.normalObject.xname).toContain('Orb of Fate');
   });
 
   it('resolves an artifact by name and forces quantity to 1', () => {
