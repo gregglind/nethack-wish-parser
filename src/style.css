@@ -150,6 +150,20 @@ code, .result-xname, input[type='text'] {
   color: var(--text-dim);
   margin-bottom: 0.3rem;
 }
+.info-icon {
+  display: inline-block;
+  margin-left: 0.35em;
+  font-size: 0.95em;
+  text-transform: none;
+  letter-spacing: normal;
+  cursor: help;
+  opacity: 0.6;
+}
+.info-icon:hover,
+.info-icon:focus {
+  opacity: 1;
+  color: var(--accent);
+}
 .example-chips {
   display: flex;
   flex-wrap: wrap;
@@ -191,11 +205,23 @@ code, .result-xname, input[type='text'] {
   border-color: var(--accent);
 }
 .result-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-dim);
   margin-bottom: 0.4rem;
+}
+.rng-badge {
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.85em;
+  color: var(--accent);
+  cursor: help;
+  white-space: nowrap;
 }
 .result-xname {
   font-size: 1.1rem;

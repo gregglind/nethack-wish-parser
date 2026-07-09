@@ -5,6 +5,8 @@ export interface AppState {
   wizardPrimary: boolean;
   luck: number;
   role: Role | null;
+  /** Explicit RNG seed from "Reroll"; undefined means "derive deterministically from the wish text" (the default). */
+  seed?: number;
 }
 
 /** A well-prepared character's practical luck (luckstone + some altar sacrifice), not the 0-luck default a brand-new character has. */
@@ -21,11 +23,13 @@ function parseRole(s: string | null): Role | null {
 
 export function readUrlState(): AppState {
   const params = new URLSearchParams(location.search);
+  const seedParam = params.get('seed');
   return {
     wish: params.get('wish') ?? '',
     wizardPrimary: params.get('wizard') === '1',
     luck: clampLuck(Number(params.get('luck') ?? DEFAULT_LUCK)),
     role: parseRole(params.get('role')),
+    seed: seedParam !== null && !Number.isNaN(Number(seedParam)) ? Number(seedParam) : undefined,
   };
 }
 
@@ -35,6 +39,7 @@ function buildParams(state: AppState): URLSearchParams {
   if (state.wizardPrimary) params.set('wizard', '1');
   if (state.luck !== DEFAULT_LUCK) params.set('luck', String(state.luck));
   if (state.role) params.set('role', state.role);
+  if (state.seed !== undefined) params.set('seed', String(state.seed));
   return params;
 }
 

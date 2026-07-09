@@ -38,6 +38,7 @@ app.innerHTML = `
           ${ROLES.map((r) => `<option value="${r}">${r}</option>`).join('')}
         </select>
       </label>
+      <button id="reroll" type="button" title="Pin a new random seed and re-run this exact wish text -- only changes anything if the result has an RNG component.">🎲 Reroll</button>
       <button id="copy-link" type="button" title="Copy a shareable link to this exact parse">Copy link</button>
     </div>
     <div class="examples">${renderExamples()}</div>
@@ -70,6 +71,7 @@ const input = qs<HTMLInputElement>(app, '#wish-input');
 const wizardToggle = qs<HTMLInputElement>(app, '#wizard-toggle');
 const luckInput = qs<HTMLInputElement>(app, '#luck-input');
 const roleInput = qs<HTMLSelectElement>(app, '#role-input');
+const rerollBtn = qs<HTMLButtonElement>(app, '#reroll');
 const copyLinkBtn = qs<HTMLButtonElement>(app, '#copy-link');
 const resultsEl = qs<HTMLDivElement>(app, '#results');
 const timelineEl = qs<HTMLDivElement>(app, '#timeline');
@@ -87,9 +89,17 @@ function render() {
     return;
   }
 
-  const result = runWishPipeline(state.wish, undefined, state.luck, state.role);
-  const wizardPanel = renderResultPanel('Wizard mode', result.wizardObject, state.wizardPrimary);
-  const normalPanel = renderResultPanel('Normal play', result.normalObject, !state.wizardPrimary);
+  const result = runWishPipeline(state.wish, state.seed, state.luck, state.role);
+  // A different seed for the same wish text/luck/role: if either xname
+  // changes, this result has a genuine RNG component (not just re-hashing
+  // the same deterministic outcome under a different number).
+  const probeSeed = (state.seed ?? 0) + 0x5bd1e995;
+  const probe = runWishPipeline(state.wish, probeSeed, state.luck, state.role);
+  const wizardHasRng = probe.wizardObject.xname !== result.wizardObject.xname;
+  const normalHasRng = probe.normalObject.xname !== result.normalObject.xname;
+
+  const wizardPanel = renderResultPanel('Wizard mode', result.wizardObject, state.wizardPrimary, wizardHasRng);
+  const normalPanel = renderResultPanel('Normal play', result.normalObject, !state.wizardPrimary, normalHasRng);
 
   resultsEl.innerHTML = state.wizardPrimary ? wizardPanel + normalPanel : normalPanel + wizardPanel;
   timelineEl.innerHTML = renderTimeline(result.steps);
@@ -105,7 +115,12 @@ function sync() {
 }
 
 input.addEventListener('input', () => {
-  state = { ...state, wish: input.value };
+  state = { ...state, wish: input.value, seed: undefined };
+  sync();
+});
+
+rerollBtn.addEventListener('click', () => {
+  state = { ...state, seed: Math.floor(Math.random() * 2 ** 31) };
   sync();
 });
 
@@ -141,7 +156,7 @@ app.querySelectorAll<HTMLButtonElement>('.chip').forEach((chip) => {
   chip.addEventListener('click', () => {
     const wish = chip.dataset.wish ?? '';
     input.value = wish;
-    state = { ...state, wish };
+    state = { ...state, wish, seed: undefined };
     sync();
   });
 });
