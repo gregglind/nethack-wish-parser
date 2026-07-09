@@ -11,6 +11,7 @@ import { renderResultPanel } from "./ui/renderResult";
 import { renderExamples, renderStarterStrip } from "./ui/renderExamples";
 import { renderScopeNotice } from "./ui/renderScopeNotice";
 import { renderMechanicNotes } from "./ui/renderMechanicNotes";
+import { renderTraitsReference } from "./ui/renderTraitsReference";
 import { escapeHtml, qs } from "./ui/domHelpers";
 import { NETHACK_VERSION, NETHACK_TREE_URL } from "./parser/sourceRefs";
 import { ROLES } from "./parser/types";
@@ -73,6 +74,7 @@ app.innerHTML = `
 
   <section class="notes-section">
     ${renderMechanicNotes()}
+    ${renderTraitsReference()}
   </section>
 
   <footer class="site-footer">

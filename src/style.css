@@ -528,6 +528,33 @@ code, .result-xname, input[type='text'] {
   color: var(--text);
 }
 
+.traits-intro {
+  margin: 0.5rem 0 0;
+}
+
+.traits-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.3rem;
+}
+
+.traits-table td {
+  padding: 0.25rem 0.5rem 0.25rem 0;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+
+.traits-table td:first-child {
+  white-space: nowrap;
+  font-family: var(--mono, monospace);
+  color: var(--accent);
+  padding-right: 1rem;
+}
+
+.traits-table tr:last-child td {
+  border-bottom: none;
+}
+
 .site-footer {
   margin-top: 2rem;
   font-size: 0.75rem;
