@@ -22,8 +22,9 @@ app.innerHTML = `
   <header class="site-header">
     <h1> Nethack Wish Commands Explained (${escapeHtml(NETHACK_VERSION)})</h1>
     <p class="tagline">
-      Type a <code>#wish</code>
-      <a href="https://nethackwiki.com/wiki/Wish" target="_blank" rel="noopener noreferrer" title="NetHackWiki: Wish" class="wiki-icon">📖</a>
+      Type a
+      <a href="https://nethackwiki.com/wiki/NetHack" target="_blank" rel="noopener noreferrer" title="NetHackWiki: NetHack">Nethack</a>
+      <a href="https://nethackwiki.com/wiki/Wish" target="_blank" rel="noopener noreferrer" title="NetHackWiki: Wish" class="tagline-wish-link"><code>#wish</code></a>
       string and see exactly how NetHack's real parser
       (<code>readobjnam()</code> in <code>src/objnam.c</code>) would walk through it,
       step by step, with links back to the source.
