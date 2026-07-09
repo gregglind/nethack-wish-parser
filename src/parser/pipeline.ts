@@ -375,6 +375,36 @@ function resolveMode(
 
   const def = typeSpecific.otyp ? byOtyp(typeSpecific.otyp) : undefined;
 
+  // Is_box(obj.h:338): only CHEST/LARGE_BOX get lock state; trapped also
+  // applies to TIN. Precedence mirrors the real if/else-if chain in
+  // objnam.c (~5349-5361): locked wins over unlocked wins over broken, and
+  // a broken box forces trapped off regardless of the "trapped" keyword.
+  const isBox = typeSpecific.otyp === 'CHEST' || typeSpecific.otyp === 'LARGE_BOX';
+  const isTin = typeSpecific.otyp === 'TIN';
+  let locked: boolean | undefined;
+  let broken: boolean | undefined;
+  if (isBox) {
+    if (workingState.locked) {
+      locked = true;
+      broken = false;
+    } else if (workingState.unlocked) {
+      locked = false;
+      broken = false;
+    } else if (workingState.broken) {
+      locked = false;
+      broken = true;
+    }
+  }
+  let trapped: boolean | undefined;
+  if (isBox || isTin) {
+    if (workingState.trapped === 2) trapped = false;
+    // "trapped" is only honored in wizard mode -- readobjnam() only ever
+    // sets d->trapped=1 when `wizard` is true at parse time; in normal
+    // play the keyword is consumed but has no effect.
+    else if (workingState.trapped === 1 && mode === 'wizard') trapped = true;
+  }
+  if (broken) trapped = false;
+
   return {
     otyp: typeSpecific.otyp,
     quan: quantityOutcome.quan,
@@ -396,6 +426,9 @@ function resolveMode(
     color: def?.color,
     contents: workingState.contents,
     rejected: null,
+    locked,
+    broken,
+    trapped,
     subNote: sub.note,
     rejectedNote: null,
     artifactNote,

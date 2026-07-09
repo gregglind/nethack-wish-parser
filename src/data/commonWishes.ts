@@ -342,6 +342,34 @@ export const COMMON_WISHES: CommonWish[] = [
     group: "Eggs",
   },
 
+  // Chests
+  {
+    text: "locked chest",
+    label: "Lock state is honored in both modes, no wizard restriction",
+    group: "Chests",
+  },
+  {
+    text: "trapped chest",
+    label:
+      '"trapped" is only honored in wizard mode -- silently ignored in normal play, which keeps whatever a real chest would roll at creation',
+    group: "Chests",
+    wizard: true,
+  },
+  {
+    text: "broken trapped chest",
+    label:
+      'A broken chest can\'t be trapped -- "broken" forces trapped off, even in wizard mode',
+    group: "Chests",
+    wizard: true,
+  },
+  {
+    text: "trapped ice box",
+    label:
+      'Only chests and large boxes are "boxes" for this purpose -- an ice box ignores "trapped" entirely, in either mode',
+    group: "Chests",
+    broken: true,
+  },
+
   // Bad luck showcase -- normal play only (wizard mode is immune to all
   // four of these); clicking sets the Luck input, not just the wish text.
   {

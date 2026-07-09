@@ -523,3 +523,37 @@ Fixed by trying an exact match first (needed for multi-word names like
 falling back to `findLongestMonsterPrefix()` on the captured text. "tin of
 orc", "tin of orc meat", and "orc tin" all now correctly resolve to "an
 uncursed tin of orc meat" in both modes.
+
+## Chest/box lock and trap state were parsed but silently discarded
+
+The `locked`/`unlocked`/`broken`/`trapped`/`untrapped` keywords were
+already recognized by `readobjnamPreparse.ts` (they consume the words and
+set flags on `ParseState`), but nothing downstream ever read those flags
+-- `pipeline.ts` never passed them into the final rendered object, so
+"locked chest" and "trapped chest" produced identical output to plain
+"chest". Fixed by adding the real gating logic (`objnam.c` ~5349-5361)
+into `resolveMode()` in `pipeline.ts`, and two new optional fields
+(`locked`, `broken`, `trapped`) to `FinalFields`/the rendered fields table
+in `xname.ts`.
+
+Key subtleties, all confirmed against source and mirrored exactly:
+
+- `Is_box(obj)` (`obj.h:338`) is only `CHEST` and `LARGE_BOX` -- an ice box
+  is a container but not a "box" for this purpose, so "trapped ice box"
+  silently ignores "trapped" entirely, in every mode.
+- Lock state (`locked`/`unlocked`/`broken`) has no wizard-mode
+  restriction at all -- it applies identically in both modes. Precedence
+  is a plain if/else-if chain: `locked` wins over `unlocked` wins over
+  `broken`, not "last qualifier wins".
+- `trapped` is genuinely wizard-mode-only, and in a way this tool's dual
+  wizard/normal architecture has to special-case: the real parser reads
+  the *actual* game's wizard-mode flag once, at parse time, so in normal
+  play `d->trapped` never even becomes `1` -- the keyword is consumed but
+  leaves no trace, not merely "denied" the way Luck-gated qualifiers are.
+  `untrapped` has no such restriction and applies in both modes.
+- A broken box can never be trapped -- `if (d.otmp->obroken) d.otmp->otrapped = 0;`
+  runs unconditionally after the trapped-setting code, so "broken trapped
+  chest" forces trapped off even in wizard mode, overriding what would
+  otherwise be an unconditional wizard grant.
+
+New "Chests" curated-examples section demonstrates all of the above.

@@ -24,6 +24,11 @@ export interface FinalFields {
   color: string | undefined;
   contents: ParseState['contents'];
   rejected: string | null;
+  /** Chest/large box only -- undefined means "not specified", not "false". */
+  locked?: boolean;
+  broken?: boolean;
+  /** Chest/large box/tin only -- undefined means "not specified". */
+  trapped?: boolean;
 }
 
 const ERODE_WORDS_1 = ['', 'rusty', 'very rusty', 'thoroughly rusty'];
@@ -137,6 +142,9 @@ export function renderObject(fields: FinalFields): RenderedObject {
   ];
   if (fields.mntmp) renderedFields.push({ label: 'Monster type', value: fields.mntmp });
   if (def?.chargeable) renderedFields.push({ label: 'Recharges', value: String(fields.rechrg) });
+  if (fields.locked !== undefined) renderedFields.push({ label: 'Locked', value: String(fields.locked) });
+  if (fields.broken !== undefined) renderedFields.push({ label: 'Broken', value: String(fields.broken) });
+  if (fields.trapped !== undefined) renderedFields.push({ label: 'Trapped', value: String(fields.trapped) });
 
   return { xname, fields: renderedFields };
 }

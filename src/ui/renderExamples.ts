@@ -76,6 +76,8 @@ const GROUP_DESCRIPTIONS: Record<string, string> = {
   "Everyday items":
     "Common, unremarkable wand-of-wishing picks for routine play.",
   Eggs: "Egg wishes only work when the monster is both recognized and actually oviparous -- an unrecognized name fails outright rather than falling back to something generic, unlike corpses/tins/figurines/statues.  If the monster is not oviparous, a generic egg will be substituted.",
+  Chests:
+    "Lock/broken state works in both modes, but \"trapped\" is wizard-mode only -- and only chests/large boxes (not ice boxes) are \"boxes\" for this purpose at all.",
 };
 
 export function renderExamples(): string {
